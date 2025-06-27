@@ -1,0 +1,66 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.17763.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
+    <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
+    <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Scripts\**" />
+    <EmbeddedResource Remove="Scripts\**" />
+    <None Remove="Scripts\**" />
+    <Page Remove="Scripts\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Logic\MainForm.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\aa.png" />
+    <None Remove="Assets\defaultAnimeIcon.jpg" />
+    <None Remove="Assets\Icon.ico" />
+    <None Remove="Assets\Icon.png" />
+    <None Remove="Assets\Kage no Jitsuryokusha ni Naritakute!.jpg" />
+    <None Remove="Assets\more.png" />
+    <None Remove="Assets\Search.png" />
+    <None Remove="Assets\settings.png" />
+    <None Remove="credentials.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\Icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="credentials.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Logic\MainForm.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DeepL.net" Version="1.15.0" />
+    <PackageReference Include="FuzzySharp" Version="2.0.2" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.69.0.3783" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
+    <PackageReference Include="JikanDotNet" Version="2.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\aa.png" />
+    <Resource Include="Assets\defaultAnimeIcon.jpg" />
+    <Resource Include="Assets\Icon.ico" />
+    <Resource Include="Assets\Icon.png" />
+    <Resource Include="Assets\Search.png" />
+    <Resource Include="Assets\settings.png" />
+  </ItemGroup>
+
+</Project>

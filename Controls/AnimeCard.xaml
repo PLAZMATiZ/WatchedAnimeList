@@ -1,0 +1,42 @@
+﻿<UserControl x:Class="WatchedAnimeList.Controls.AnimeCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Width="162" Height="280">
+    <Grid Background="Transparent" Margin="8">
+        <Button x:Name="AnimeCardButton" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand" Style="{StaticResource AnimeCardButton}">
+            <Border Background="#FF141414" BorderThickness="1" BorderBrush="#2C2C2C" Width="140" Height="260"  Margin="2" CornerRadius="10">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="210"/>
+                        <RowDefinition Height="1*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0" Width="140" Height="210" HorizontalAlignment="Center">
+                        <Image x:Name="AnimeCardImage"  Source="pack://application:,,,/Assets/defaultAnimeIcon.jpg" Stretch="UniformToFill" Width="140" Height="210" />
+                        <Grid.Clip>
+                            <PathGeometry>
+                                <PathFigure StartPoint="0,10" IsClosed="True">
+                                    <!-- Ліва верхня дуга -->
+                                    <ArcSegment Point="10,0" Size="10,10" SweepDirection="Clockwise" />
+
+                                    <!-- Верхня лінія до правого кута -->
+                                    <LineSegment Point="130,0" />
+
+                                    <!-- Права верхня дуга -->
+                                    <ArcSegment Point="140,10" Size="10,10" SweepDirection="Clockwise" />
+
+                                    <!-- Правий бік донизу -->
+                                    <LineSegment Point="140,220" />
+
+                                    <!-- Низ -->
+                                    <LineSegment Point="0,220" />
+                                </PathFigure>
+                            </PathGeometry>
+                        </Grid.Clip>
+                    </Grid>
+                    <TextBlock x:Name="AnimeCardName" Text="no data" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Foreground="#e5e5e5" FontFamily="Segoe Print" FontSize="18" TextAlignment="Center" />
+                </Grid>
+            </Border>
+        </Button>
+    </Grid>
+</UserControl>
