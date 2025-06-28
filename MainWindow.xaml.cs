@@ -98,9 +98,9 @@ namespace WatchedAnimeList
         #region Buffer Button
         private void AddAnimeButton_Click(object sender, EventArgs e)
         {
-            if (Clipboard.ContainsText())
+            if (System.Windows.Clipboard.ContainsText())
             {
-                string text = Clipboard.GetText();
+                string text = System.Windows.Clipboard.GetText();
 
                 if (SiteParser.Global.UrlValidate(text))
                 {
@@ -113,12 +113,12 @@ namespace WatchedAnimeList
                 }
                 else
                 {
-                    MessageBox.Show("Даун шо за хуйня а не текст");
+                    Debug.Show("Даун шо за хуйня а не текст");
                 }
             }
             else
             {
-                MessageBox.Show("Даун скопіюй нормально");
+                Debug.Show("Даун скопіюй нормально");
             }
         }
         private async Task SiteParse(string url)
@@ -150,7 +150,7 @@ namespace WatchedAnimeList
 
             if (AnimeNameEN == "" || AnimeName == "" || AnimeNameEN == null || AnimeName == null)
             {
-                MessageBox.Show("Силка хуйня");
+                Debug.Show("Силка хуйня");
                 return;
             }
             CreateAnimeCard(AnimeNameEN, AnimeName);
@@ -524,5 +524,12 @@ namespace WatchedAnimeList
             userConfirmationTask?.TrySetResult(false);
         }
         #endregion
+        protected override void OnStateChanged(EventArgs e)
+        {
+            base.OnStateChanged(e);
+
+            if (WindowState == WindowState.Minimized)
+                this.Hide();
+        }
     }
 }

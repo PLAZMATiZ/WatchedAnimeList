@@ -51,7 +51,7 @@ namespace WatchedAnimeList.Helpers
 
                         if (bitmap != null)
                         {
-                            Application.Current.Dispatcher.Invoke(() =>
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
                             {
                                 vm.AnimeImage = bitmap;
                             });
@@ -127,7 +127,7 @@ namespace WatchedAnimeList.Helpers
 
             await Task.WhenAll(tasks);
 
-            await Application.Current.Dispatcher.InvokeAsync(() =>
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
                 targetCollection.Clear();
                 foreach (var item in tempList)

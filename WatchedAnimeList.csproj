@@ -9,6 +9,7 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
     <PlatformTarget>x64</PlatformTarget>
+    <UseWindowsForms>True</UseWindowsForms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,10 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Icon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="credentials.json" />
   </ItemGroup>
 
@@ -58,9 +55,11 @@
   <ItemGroup>
     <Resource Include="Assets\aa.png" />
     <Resource Include="Assets\defaultAnimeIcon.jpg" />
-    <Resource Include="Assets\Icon.ico" />
+    <Content Include="Assets\Icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Assets\Icon.png" />
-    <Resource Include="Assets\Search.png" />
+    <Content Include="Assets\Search.png" />
     <Resource Include="Assets\settings.png" />
   </ItemGroup>
 

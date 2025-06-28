@@ -27,7 +27,7 @@ namespace WatchedAnimeList.Helpers
                 default: icon = MessageBoxImage.Information; break;
             }
 
-            MessageBox.Show(message, title, MessageBoxButton.OK, icon);
+            System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, icon);
         }
 
         public static void Log(string message)

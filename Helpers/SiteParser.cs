@@ -1,5 +1,6 @@
 using System.Net.Http;
 using HtmlAgilityPack;
+using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace WatchedAnimeList.Helpers
 {
