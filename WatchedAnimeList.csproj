@@ -52,6 +52,7 @@
     <PackageReference Include="Google.Apis.Drive.v3" Version="1.69.0.3783" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.1" />
     <PackageReference Include="JikanDotNet" Version="2.9.1" />
+    <PackageReference Include="VirtualizingWrapPanel" Version="2.2.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -29,8 +29,10 @@ using System.ComponentModel;
 using WatchedAnimeList.Helpers;
 using WatchedAnimeList.Logic;
 using WatchedAnimeList.Models;
+using WatchedAnimeList.ViewModels;
 using WatchedAnimeList.Controls;
 using System.Windows.Threading;
+using System.Collections.ObjectModel;
 
 namespace WatchedAnimeList
 {
@@ -39,15 +41,22 @@ namespace WatchedAnimeList
         public static MainWindow Global;
         public MainWindow()
         {
-            InitializeComponent();
             Global = this;
 
-            new WachedAnimeSaveLoad().Initialize();
-            new SiteParser().Initialize();
-            new Settings(this);
+            InitializeComponent();
+
+            this.DataContext = new AnimeViewModel();
+            Initializer.Inithialize();
+
+
 
             SetupSearchDelay();
         }
+
+
+        #region xz
+
+        #endregion
 
         #region Add Anime
 
@@ -322,36 +331,25 @@ namespace WatchedAnimeList
             image.Freeze();
             return image;
         }
-
-        private Dictionary<string, AnimeCard> cardCache = new();
-        public void AddAnimeCardsAsync(WachedAnimeData[] animeArray)
+        public async Task AddAnimeCardsAsync(WachedAnimeData[] animeArray)
         {
-            foreach (var item in animeArray)
+            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
             {
-                var card = new AnimeCard(item.AnimeName, item.AnimeImage);
-                card.CardClicked += (s, animeName) =>
+                foreach (var item in animeArray)
                 {
-                    AnimeCardInfoPanel.Visibility = Visibility.Visible;
-                    cardCache[item.AnimeName] = card;
-                };
-                AnimeCardWrapPanel.Children.Add(card);
-            }
-            WachedAnimeSaveLoad.Global.Save();
+                    var viewModel = new AnimeItemViewModel(item, OnAnimeCardClicked);
+                    AnimeViewModel.Global.AnimeList.Add(viewModel);
+                }
+
+                WachedAnimeSaveLoad.Global.Save();
+            });
+        }
+        public void OnAnimeCardClicked(string animeNameEN)
+        {
+            // Наприклад, відкриття деталей:
+            Debug.Show($"Натиснуто: {animeNameEN}");
         }
 
-        public void UpdateList()
-        {
-            var keys = WachedAnimeSaveLoad.Global.wachedAnimeDict.Keys;
-            foreach (var item in keys)
-            {
-                var card = new AnimeCard(item, WachedAnimeSaveLoad.Global.wachedAnimeDict[item].AnimeImage);
-                card.CardClicked += (s, animeName) =>
-                {
-                    MessageBox.Show($"Ти клікнув по: {animeName}");
-                };
-                AnimeCardWrapPanel.Children.Add(card);
-            }
-        }
 
         #endregion
 
@@ -411,26 +409,14 @@ namespace WatchedAnimeList
         }
         public void ReorderCards(IEnumerable<WachedAnimeData> reorderedList)
         {
-            AnimeCardWrapPanel.Children.Clear();
-
+            AnimeViewModel.Global.AnimeList.Clear();
             foreach (var data in reorderedList)
             {
-                if (cardCache.TryGetValue(data.AnimeName, out var card))
-                {
-                    AnimeCardWrapPanel.Children.Add(card);
-                }
-                else
-                {
-                    // fallback якщо картки немає — створити
-                    var newCard = new AnimeCard(data.AnimeName, data.AnimeImage);
-                    newCard.CardClicked += (s, animeName) =>
-                    {
-                        AnimeCardInfoPanel.Visibility = Visibility.Visible;
-                    };
-                    cardCache[data.AnimeName] = newCard;
-                    AnimeCardWrapPanel.Children.Add(newCard);
-                }
+                var viewModel = new AnimeItemViewModel(data, OnAnimeCardClicked);
+                AnimeViewModel.Global.AnimeList.Add(viewModel);
             }
+
+            WachedAnimeSaveLoad.Global.Save();
         }
 
         #endregion

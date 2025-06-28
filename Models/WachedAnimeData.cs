@@ -6,7 +6,7 @@ namespace WatchedAnimeList.Models
     public class WachedAnimeData
     {
         [JsonIgnore]
-        public BitmapImage AnimeImage;
+        public BitmapImage AnimeImage { get; set; }
 
         public string AnimeName { get; set; }
         public string AnimeNameEN { get; set; }

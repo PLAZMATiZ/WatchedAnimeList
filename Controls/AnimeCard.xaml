@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              Width="162" Height="280">
     <Grid Background="Transparent" Margin="8">
-        <Button x:Name="AnimeCardButton" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand" Style="{StaticResource AnimeCardButton}">
+        <Button x:Name="AnimeCardButton" Command="{Binding CardClickCommand}" Focusable="False" FocusVisualStyle="{x:Null}" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Cursor="Hand" Style="{StaticResource AnimeCardButton}">
             <Border Background="#FF141414" BorderThickness="1" BorderBrush="#2C2C2C" Width="140" Height="260"  Margin="2" CornerRadius="10">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -12,7 +12,7 @@
                     </Grid.RowDefinitions>
 
                     <Grid Grid.Row="0" Width="140" Height="210" HorizontalAlignment="Center">
-                        <Image x:Name="AnimeCardImage"  Source="pack://application:,,,/Assets/defaultAnimeIcon.jpg" Stretch="UniformToFill" Width="140" Height="210" />
+                        <Image x:Name="AnimeCardImage"  Source="{Binding AnimeImage}" Stretch="UniformToFill" Width="140" Height="210" />
                         <Grid.Clip>
                             <PathGeometry>
                                 <PathFigure StartPoint="0,10" IsClosed="True">
@@ -34,7 +34,7 @@
                             </PathGeometry>
                         </Grid.Clip>
                     </Grid>
-                    <TextBlock x:Name="AnimeCardName" Text="no data" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Foreground="#e5e5e5" FontFamily="Segoe Print" FontSize="18" TextAlignment="Center" />
+                    <TextBlock x:Name="AnimeCardName" Text="{Binding AnimeNameEN}" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Foreground="#e5e5e5" FontFamily="Segoe Print" FontSize="18" TextAlignment="Center" />
                 </Grid>
             </Border>
         </Button>

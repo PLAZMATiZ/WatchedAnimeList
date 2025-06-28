@@ -14,9 +14,9 @@ namespace WatchedAnimeList.Logic
         public IniFile iniFile;
         private readonly Window window;
 
-        public Settings(Window mainWindow)
+        public Settings()
         {
-            window = mainWindow;
+            window = MainWindow.Global;
             Global = this;
             LoadSettings();
         }
