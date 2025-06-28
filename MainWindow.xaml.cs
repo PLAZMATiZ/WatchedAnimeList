@@ -51,11 +51,43 @@ namespace WatchedAnimeList
 
 
             SetupSearchDelay();
+            Huinya();
         }
+
 
 
         #region xz
 
+        public void Huinya()
+        {
+            AnimeCardList.PreviewMouseWheel += (sender, e) =>
+            {
+                var scrollViewer = FindVisualChild<ScrollViewer>(AnimeCardList);
+                if (scrollViewer != null)
+                {
+                    // Дробний крок, наприклад 0.2 рядка на 1 одиницю Delta
+                    double delta = -e.Delta * 0.4; // 120 * 0.05 = 6 рядків за один крок, можна зменшити ще
+
+                    scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset + delta);
+                    e.Handled = true;
+                }
+            };
+
+        }
+        // Допоміжний метод для пошуку ScrollViewer всередині ListBox
+        public static T? FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(obj, i);
+                if (child is T t)
+                    return t;
+                var childOfChild = FindVisualChild<T>(child);
+                if (childOfChild != null)
+                    return childOfChild;
+            }
+            return null;
+        }
         #endregion
 
         #region Add Anime

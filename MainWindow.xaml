@@ -129,27 +129,29 @@
                     </Button>
                 </Border>
             </Grid>
-            
-            <Grid Name="ContentPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#1e1e1e">
-                <ScrollViewer Margin="0,0,0,0" Padding="10,10,10,10" VerticalScrollBarVisibility="Auto" >
 
-                    <ListBox x:Name="AnimeCardList"
-                         ItemsSource="{Binding AnimeList}"
-                         ScrollViewer.CanContentScroll="True"
-                         VirtualizingPanel.IsVirtualizing="True"
-                         VirtualizingPanel.VirtualizationMode="Recycling" Background="Transparent">
-                        <ListBox.ItemsPanel>
-                            <ItemsPanelTemplate>
-                                <vwp:VirtualizingWrapPanel x:Name="AnimeCardWrapPanel" Orientation="Horizontal"/>
-                            </ItemsPanelTemplate>
-                        </ListBox.ItemsPanel>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <local:AnimeCard />
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </ScrollViewer>
+            <Grid Name="ContentPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#1e1e1e">
+                <ListBox x:Name="AnimeCardList"
+                             Margin="10,10,10,10"
+                             ItemsSource="{Binding AnimeList}"
+                             ScrollViewer.CanContentScroll="True"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             VirtualizingPanel.IsVirtualizing="True"
+                             VirtualizingPanel.VirtualizationMode="Recycling"
+                             Background="Transparent"
+                             BorderThickness="0">
+
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <vwp:VirtualizingWrapPanel x:Name="AnimeCardWrapPanel" Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <local:AnimeCard />
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
             </Grid>
             <!-- Інфо-панель для підтвердження -->
             <Grid Grid.Row="2" x:Name="AnimeCardInfoPanel" Background="Transparent" Visibility="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
