@@ -1,8 +1,12 @@
 ﻿using System.Configuration;
 using System.Data;
+using System.IO;
+using System.Reflection;
 using System.Windows;
 using Microsoft.Win32;
 using WatchedAnimeList.Helpers;
+using System.Diagnostics;
+using Debug = WatchedAnimeList.Helpers.Debug;
 
 namespace WatchedAnimeList
 {
@@ -20,11 +24,12 @@ namespace WatchedAnimeList
             MainWindow = mainWindow;
             mainWindow.Show(); // Показуємо вікно
 
+            var assembly = Assembly.GetExecutingAssembly();
+            using Stream stream = assembly.GetManifestResourceStream("WatchedAnimeList.Assets.Icon.ico");
             // Створюємо трей-іконку
             _notifyIcon = new NotifyIcon
             {
-                Icon = new System.Drawing.Icon(
-                    System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Icon.ico")),
+                Icon = new Icon(stream),
                 Visible = true,
                 Text = "WatchedAnimeList"
             };
@@ -36,16 +41,65 @@ namespace WatchedAnimeList
             _notifyIcon.ContextMenuStrip = contextMenu;
             _notifyIcon.DoubleClick += (s, ev) => ShowMainWindow();
 
-            string appName = "WatchedAnimeList";
-            string exePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
-            #if !DEBUG
-            // Додати до автозапуску тільки у Release
-            //AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
+
+
+
+
+            string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                        if (!File.Exists(exePath))
+                Debug.Show($"Executable not found: {exePath}");
+            AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
             
-            // Перевірити, чи увімкнено автозапуск
-            bool isEnabled = AutorunHelper.IsAutorunEnabled(appName);
-            #endif
+
+            try
+            {
+                AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Failed to set autorun: " + ex.Message);
+            }
+
+            UpadteUpdater();
+        }
+
+        private async void UpadteUpdater()
+        {
+            const string repoApi = "https://api.github.com/repos/PLAZMATiZ/WatchedAnimeList/releases/tags/updater";
+            const string fileToDownload = "WAL_Updater.exe";
+            const string localPath = "WAL_Updater.exe";
+
+
+            string? latestVersion = await GitHubVersionHelper.GetVersionFromReleaseNameAsync(repoApi);
+
+            if (!string.IsNullOrEmpty(latestVersion))
+            {
+                bool success = await GitHubFileDownloader.DownloadFileFromLatestReleaseAsync(
+                    repoApi,
+                    fileToDownload,
+                    localPath
+                );
+
+                if (success)
+                {
+                    Debug.Log("Updater успішно завантажено.");
+                }
+            }
+            else
+            {
+                Debug.Log("Не вдалося визначити версію.");
+            }
+
+            string walTrayPath = Path.Combine(Directory.GetCurrentDirectory(), "WAL_Updater.exe");
+            if(walTrayPath != null)
+                Debug.Log("Updater запущено.");
+
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = walTrayPath,
+                UseShellExecute = true
+            });
         }
 
         private void ShowMainWindow()

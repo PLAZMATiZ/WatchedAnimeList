@@ -55,9 +55,9 @@
   <ItemGroup>
     <Resource Include="Assets\aa.png" />
     <Resource Include="Assets\defaultAnimeIcon.jpg" />
-    <Content Include="Assets\Icon.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <EmbeddedResource Include="Assets\Icon.ico">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </EmbeddedResource>
     <Resource Include="Assets\Icon.png" />
     <Content Include="Assets\Search.png" />
     <Resource Include="Assets\settings.png" />

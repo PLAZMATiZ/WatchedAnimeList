@@ -2,6 +2,7 @@
 using System.Windows;
 using System.IO;
 using Application = System.Windows.Application;
+using System.Reflection;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -15,8 +16,17 @@ namespace WatchedAnimeList.Helpers
             _mainWindow = mainWindow;
 
             _notifyIcon = new NotifyIcon();
-            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "Icon.ico");
-            _notifyIcon.Icon = new System.Drawing.Icon(iconPath);
+            var assembly = Assembly.GetExecutingAssembly();
+            using Stream iconStream = assembly.GetManifestResourceStream("WatchedAnimeList.Assets.Icon.ico");
+
+            if (iconStream != null)
+            {
+                _notifyIcon.Icon = new Icon(iconStream);
+            }
+            else
+            {
+                Debug.Show("Icon not found in embedded resources.");
+            }
 
             _notifyIcon.Visible = true;
             _notifyIcon.Text = "Watched Anime List";
