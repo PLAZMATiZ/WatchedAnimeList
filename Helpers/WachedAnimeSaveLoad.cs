@@ -10,6 +10,7 @@ using WatchedAnimeList.ViewModels;
 using JikanDotNet;
 using System.Diagnostics;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -174,11 +175,52 @@ namespace WatchedAnimeList.Helpers
 
             var failed = await AnimePostersLoader.LoadImagesAsync(AnimeViewModel.Global.AnimeList, Path.Combine(folderPath, "Anime Icons"));
 
-            if(failed.Count !=0)
+            if (failed.Count != 0)
             {
                 Debug.Show($"FaledLOadIcon = {failed.Count}");
 
             }
+
+            // GoogleDrive
+
+            var drive = new GoogleDriveHelper();
+            await drive.InitAsync();
+
+            string jsonText = await drive.DownloadJsonAsync("anime_data.json");
+
+            data = new WachedAnimeSaveDataCollection();
+            if (!string.IsNullOrWhiteSpace(jsonText))
+            {
+                data = TryDeserialize(jsonText);
+            }
+
+            if (data.dataCollection.Length == 0)
+                return;
+
+            var addedItems = new ConcurrentBag<WachedAnimeData>();
+            Parallel.ForEach(data.dataCollection, new ParallelOptions { MaxDegreeOfParallelism = 4 }, item =>
+            {
+                if (!wachedAnimeDict.ContainsKey(item.AnimeNameEN))
+                {
+                    var animeData = new WachedAnimeData
+                    {
+                        AnimeName = item.AnimeName,
+                        AnimeNameEN = item.AnimeNameEN,
+                        Rating = item.Rating
+                    };
+
+                    if (wachedAnimeDict.TryAdd(item.AnimeNameEN, animeData))
+                    {
+                        addedItems.Add(animeData);
+                    }
+                }
+            });
+
+            Debug.Log($"В Google Drive знайдено: {addedItems.Count} аніме");
+            AnimeViewModel.Global.AnimeList.AddRange(
+                addedItems.Select(data => new AnimeItemViewModel(data, MainWindow.Global.OnAnimeCardClicked))
+            );
+
         }
 
         private WachedAnimeSaveDataCollection TryDeserialize(string json)

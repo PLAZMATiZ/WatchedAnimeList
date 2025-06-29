@@ -83,7 +83,7 @@ namespace WatchedAnimeList.Helpers
 
         public async Task UploadJsonAsync(string jsonText, string fileName)
         {
-            string folderId = await CreateOrGetFolderIdAsync("WachedAnimeList");
+            string folderId = await CreateOrGetFolderIdAsync("Wat  chedAnimeList");
 
             // перевіряємо, чи такий файл вже є
             var listRequest = service.Files.List();

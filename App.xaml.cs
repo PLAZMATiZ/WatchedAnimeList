@@ -61,7 +61,9 @@ namespace WatchedAnimeList
                 Debug.Log("Failed to set autorun: " + ex.Message);
             }
 
+#if !DEBUG
             UpadteUpdater();
+#endif
         }
 
         private async void UpadteUpdater()
