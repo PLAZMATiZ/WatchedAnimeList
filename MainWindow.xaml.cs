@@ -44,6 +44,10 @@ namespace WatchedAnimeList
             Global = this;
 
             InitializeComponent();
+            try
+            {
+
+          
 
             this.DataContext = new AnimeViewModel();
             Initializer.Inithialize();
@@ -51,7 +55,12 @@ namespace WatchedAnimeList
 
 
             SetupSearchDelay();
-            Huinya();
+            Huinya(); 
+            }
+            catch (Exception ex)
+            {
+                Debug.Log(ex.ToString());
+            }
         }
 
 

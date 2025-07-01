@@ -7,6 +7,10 @@ using Microsoft.Win32;
 using WatchedAnimeList.Helpers;
 using System.Diagnostics;
 using Debug = WatchedAnimeList.Helpers.Debug;
+using System.Text.Json;
+using System.Collections.Generic;
+using System.Windows.Forms;
+using System.Drawing;
 
 namespace WatchedAnimeList
 {
@@ -15,15 +19,53 @@ namespace WatchedAnimeList
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        private NotifyIcon _notifyIcon;
+        
+        [STAThread]
+        public static void Main()
+        {
+            Debug.Log("=== WAL starting via Main() ===");
+
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            {
+                Debug.Log($"[UnhandledException] {e.ExceptionObject}\n");
+            };
+
+            WatchedAnimeList.App app = new WatchedAnimeList.App();
+            app.InitializeComponent();
+            app.Startup += app.Application_Startup;
+            app.Run();
+        }
 
         private void Application_Startup(object sender, StartupEventArgs e)
         {
-            // Створюємо MainWindow
-            var mainWindow = new MainWindow();
-            MainWindow = mainWindow;
-            mainWindow.Show(); // Показуємо вікно
+            try
+            {
+                // Створюємо MainWindow
+                var mainWindow = new MainWindow();
+                MainWindow = mainWindow;
+                mainWindow.Show(); // Показуємо вікно
 
+#if !DEBUG
+                if (!AutorunHelper.IsAutorunEnabled("WatchedAnimeList"))
+                {
+                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    if (!File.Exists(exePath))
+                        Debug.Show($"Executable not found: {exePath}");
+                    AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
+                }
+                UpdateUpdater();
+#endif
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("App startup crash: " + ex);
+            }
+            CreateNotifyIcon();
+        }
+
+        private NotifyIcon _notifyIcon;
+        private void CreateNotifyIcon()
+        {
             var assembly = Assembly.GetExecutingAssembly();
             using Stream stream = assembly.GetManifestResourceStream("WatchedAnimeList.Assets.Icon.ico");
             // Створюємо трей-іконку
@@ -40,52 +82,63 @@ namespace WatchedAnimeList
 
             _notifyIcon.ContextMenuStrip = contextMenu;
             _notifyIcon.DoubleClick += (s, ev) => ShowMainWindow();
-
-
-
-
-
-
-            string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        if (!File.Exists(exePath))
-                Debug.Show($"Executable not found: {exePath}");
-            AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
-            
-
-            try
-            {
-                AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
-            }
-            catch (Exception ex)
-            {
-                Debug.Log("Failed to set autorun: " + ex.Message);
-            }
-
-#if !DEBUG
-            UpadteUpdater();
-#endif
         }
 
-        private async void UpadteUpdater()
+        private void OnOpenClick(object sender, RoutedEventArgs e)
+        {
+            if (MainWindow == null)
+                MainWindow = new MainWindow();
+
+            if (!MainWindow.IsVisible)
+                MainWindow.Show();
+
+            if (MainWindow.WindowState == WindowState.Minimized)
+                MainWindow.WindowState = WindowState.Normal;
+
+            MainWindow.Activate();
+        }
+
+        private void OnExitClick(object sender, RoutedEventArgs e)
+        {
+            Current.Shutdown();
+        }
+
+        private async void UpdateUpdater()
         {
             const string repoApi = "https://api.github.com/repos/PLAZMATiZ/WatchedAnimeList/releases/tags/updater";
             const string fileToDownload = "WAL_Updater.exe";
-            const string localPath = "WAL_Updater.exe";
 
+            string localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileToDownload);
 
             string? latestVersion = await GitHubVersionHelper.GetVersionFromReleaseNameAsync(repoApi);
+            string? localVersion = LocalVersionStorage.GetVersion("Updater");
+            Debug.Log($"Локальна версія {localVersion ?? "null"} остання {latestVersion}...");
 
             if (!string.IsNullOrEmpty(latestVersion))
             {
-                bool success = await GitHubFileDownloader.DownloadFileFromLatestReleaseAsync(
-                    repoApi,
-                    fileToDownload,
-                    localPath
-                );
-
-                if (success)
+                if (latestVersion == localVersion)
                 {
-                    Debug.Log("Updater успішно завантажено.");
+                    Debug.Log("Updater вже актуальний.");
+                }
+                else
+                {
+                    Debug.Log($"Оновлення Updater");
+
+                    bool success = await GitHubFileDownloader.DownloadFileFromLatestReleaseAsync(
+                        repoApi,
+                        fileToDownload,
+                        localPath
+                    );
+
+                    if (success)
+                    {
+                        Debug.Log("Updater успішно завантажено.");
+                        LocalVersionStorage.SetVersion("Updater", latestVersion);
+                    }
+                    else
+                    {
+                        Debug.Log("Завантаження Updater не вдалося.");
+                    }
                 }
             }
             else
@@ -93,16 +146,27 @@ namespace WatchedAnimeList
                 Debug.Log("Не вдалося визначити версію.");
             }
 
-            string walTrayPath = Path.Combine(Directory.GetCurrentDirectory(), "WAL_Updater.exe");
-            if(walTrayPath != null)
-                Debug.Log("Updater запущено.");
-
-            Process.Start(new ProcessStartInfo()
+            if (!File.Exists(localPath))
             {
-                FileName = walTrayPath,
-                UseShellExecute = true
-            });
+                Debug.Log("Updater не знайдено за шляхом: " + localPath);
+                return;
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = localPath,
+                    UseShellExecute = true
+                });
+                Debug.Log("Запуск Updater");
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Помилка запуску Updater: {ex.Message}");
+            }
         }
+
 
         private void ShowMainWindow()
         {
@@ -116,6 +180,44 @@ namespace WatchedAnimeList
                 MainWindow.WindowState = WindowState.Normal;
 
             MainWindow.Activate();
+        }
+    }
+
+    public static class LocalVersionStorage
+    {
+        private static readonly string VersionFilePath =
+            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.json");
+
+        public static Dictionary<string, string> Load()
+        {
+            if (!File.Exists(VersionFilePath))
+                return new();
+
+            string json = File.ReadAllText(VersionFilePath);
+            return JsonSerializer.Deserialize<Dictionary<string, string>>(json) ?? new();
+        }
+
+        public static void Save(Dictionary<string, string> versions)
+        {
+            var json = JsonSerializer.Serialize(versions, new JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            File.WriteAllText(VersionFilePath, json);
+        }
+
+        public static string? GetVersion(string component)
+        {
+            var versions = Load();
+            return versions.TryGetValue(component, out var version) ? version : null;
+        }
+
+        public static void SetVersion(string component, string version)
+        {
+            var versions = Load();
+            versions[component] = version;
+            Save(versions);
         }
     }
 }

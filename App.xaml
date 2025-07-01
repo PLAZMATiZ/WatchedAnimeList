@@ -1,11 +1,23 @@
 ﻿<Application x:Class="WatchedAnimeList.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:tb="http://www.hardcodet.net/taskbar"
              xmlns:local="clr-namespace:WatchedAnimeList"
-             Startup="Application_Startup"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
 
+        <!-- Контекстне меню для трей-іконки -->
+        <ContextMenu x:Key="TrayMenu" x:Shared="False">
+            <MenuItem Header="Відкрити" Click="OnOpenClick" />
+            <MenuItem Header="Вийти" Click="OnExitClick" />
+        </ContextMenu>
+
+        <!-- Трей-іконка -->
+        <tb:TaskbarIcon x:Key="TrayIcon"
+                        IconSource="pack://application:,,,/Assets/Icon.ico"
+                        ToolTipText="WatchedAnimeList"
+                        ContextMenu="{StaticResource TrayMenu}" />
+        
         <Style TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>

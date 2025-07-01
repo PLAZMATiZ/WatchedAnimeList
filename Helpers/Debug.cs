@@ -33,7 +33,7 @@ namespace WatchedAnimeList.Helpers
         public static void Log(string message)
         {
             string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
-            File.AppendAllText(logPath, formatted);
+            File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logPath), formatted);
         }
 
         public static void ShowAndLog(string message, NotificationType type = NotificationType.Info)
