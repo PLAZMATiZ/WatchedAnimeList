@@ -497,7 +497,7 @@ namespace WatchedAnimeList
         // Закрити
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            Close();
+            Hide();
         }
 
         // Мінімізувати
