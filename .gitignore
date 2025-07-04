@@ -365,3 +365,4 @@ FodyWeavers.xsd
 # OAuth Client ID (credentials.json)
 credentials.json
 Build Command.txt
+libmpv-2.dll

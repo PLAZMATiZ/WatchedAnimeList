@@ -61,4 +61,10 @@
     <Resource Include="Assets\settings.png" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="libmpv-2.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -6,18 +6,6 @@
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
 
-        <!-- Контекстне меню для трей-іконки -->
-        <ContextMenu x:Key="TrayMenu" x:Shared="False">
-            <MenuItem Header="Відкрити" Click="OnOpenClick" />
-            <MenuItem Header="Вийти" Click="OnExitClick" />
-        </ContextMenu>
-
-        <!-- Трей-іконка -->
-        <tb:TaskbarIcon x:Key="TrayIcon"
-                        IconSource="pack://application:,,,/Assets/Icon.ico"
-                        ToolTipText="WatchedAnimeList"
-                        ContextMenu="{StaticResource TrayMenu}" />
-        
         <Style TargetType="Button">
             <Setter Property="Template">
                 <Setter.Value>
@@ -85,7 +73,11 @@
                                     <RepeatButton Command="ScrollBar.LineUpCommand" />
                                 </Track.DecreaseRepeatButton>
                                 <Track.Thumb>
-                                    <Thumb Background="DarkOrange" Height="10" Width="10" />
+                                    <Thumb Background="DarkGray"
+                                           Margin="0"
+                                           BorderThickness="0"
+                                           MinHeight="10"
+                                           MinWidth="10"/>
                                 </Track.Thumb>
                                 <Track.IncreaseRepeatButton>
                                     <RepeatButton Command="ScrollBar.LineDownCommand" />
