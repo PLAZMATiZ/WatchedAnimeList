@@ -3,10 +3,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-             xmlns:wfi="clr-namespace:System.Windows.Forms.Integration;assembly=WindowsFormsIntegration"
              xmlns:local="clr-namespace:WatchedAnimeList.Controls"
              mc:Ignorable="d" 
              d:DesignWidth="1920" d:DesignHeight="1080">
+    <UserControl.Resources>
+        <local:FileNameConverter x:Key="FileNameConverter" />
+    </UserControl.Resources>
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
             <RowDefinition Height="70"/>
@@ -21,21 +23,52 @@
                 <ColumnDefinition Width="1*"/>
             </Grid.ColumnDefinitions>
             <Grid Grid.Column="0">
-                <Button Click="MainPage_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#FF31A5FF"/>
+                <Button Click="MainPage_Button_Click" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#4e4e4e"/>
             </Grid>
         </Grid>
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <Grid Height="420" Background="AliceBlue">
+        <Grid Grid.Row="0" Background="#FF31A5FF">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.3*"/>
+                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition Width="0.5*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Click="MainPage_Button_Click" Content="← Назад" Background="#2e2e2e" Foreground="#e5e5e5" />
+            <TextBox Grid.Column="1" x:Name="TitleTextBox" FontSize="20" VerticalContentAlignment="Center" Text="Назва тайтлу" HorizontalContentAlignment="Center" Background="#2e2e2e" Foreground="#e5e5e5"/>
+            <TextBlock Grid.Column="2" x:Name="EpisodesCountText" FontSize="20" VerticalAlignment="Center" Foreground="White" Text="Серій: 0" TextAlignment="Right" Margin="10" HorizontalAlignment="Center"/>
+        </Grid>
 
-                </Grid>
-                <Grid Height="720" Background="Aqua">
+        <!-- Основна зона з логом -->
+        <Grid Grid.Row="1" Background="#1e1e1e" AllowDrop="True">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="50"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-                    <wfi:WindowsFormsHost x:Name="host"/>
+            <TextBox Grid.Row="0" x:Name="LogTextBox" FontFamily="Consolas" FontSize="14" IsReadOnly="True" 
+                     VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="Лог..." 
+                     VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" 
+                     VerticalAlignment="Center" Background="#1e1e1e" Foreground="#e5e5e5"/>
 
-                   
-                </Grid>
-            </StackPanel>
-        </ScrollViewer>
+            <Grid Grid.Row="1">
+                <ListBox x:Name="AnimeEpisodesList"
+                         Margin="10,10,10,10"
+                         ItemsSource="{Binding AnimeList}"
+                         ScrollViewer.CanContentScroll="True"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto"
+                         VirtualizingPanel.IsVirtualizing="True"
+                         VirtualizingPanel.VirtualizationMode="Recycling"
+                         Background="Transparent"
+                         BorderThickness="0">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Button Click="PlayEpisode_Click" Tag="{Binding}"
+                                    Background="#4e4e4e" Foreground="#e4e4e4">
+                                <TextBlock Text="{Binding Converter={StaticResource FileNameConverter}}" />
+                            </Button>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Grid>
     </Grid>
 </UserControl>

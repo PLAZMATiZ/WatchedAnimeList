@@ -1,38 +1,9 @@
 ﻿using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using DeepL;
-using JikanDotNet;
-using static System.Net.Mime.MediaTypeNames;
-using System.Data;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using FuzzySharp;
-using System.Net.Http;
-
-using HtmlAgilityPack;
-using HtmlDocument = HtmlAgilityPack.HtmlDocument;
-using System.Xml.Linq;
-using System.ComponentModel;
 
 using WatchedAnimeList.Helpers;
-using WatchedAnimeList.Logic;
-using WatchedAnimeList.Models;
-using WatchedAnimeList.ViewModels;
 using WatchedAnimeList.Controls;
-using System.Windows.Threading;
-using System.Collections.ObjectModel;
 
 namespace WatchedAnimeList
 {
@@ -59,9 +30,6 @@ namespace WatchedAnimeList
         {
             switch(page)
             {
-                case "WatchAnimePage":
-                    MainContent.Content = new WatchAnimePage();
-                    break;
                 case "MainPage":
                     MainContent.Content = mainPage;
                     break;
@@ -99,6 +67,32 @@ namespace WatchedAnimeList
                 WindowState = WindowState.Normal;
             }
         }
+
+        private void OnDragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effects = DragDropEffects.Copy;
+            else
+                e.Effects = DragDropEffects.None;
+
+            e.Handled = true;
+        }
+
+        private void OnTorrentFileDropped(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+                string torrentFile = files.FirstOrDefault(f => f.EndsWith(".torrent"));
+
+                if (torrentFile != null)
+                {
+                    WatchAnimePage page = new(torrentFile);
+                    MainContent.Content = page;
+                }
+            }
+        }
+
         #endregion
         protected override void OnStateChanged(EventArgs e)
         {

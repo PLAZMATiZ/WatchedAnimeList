@@ -12,6 +12,7 @@ namespace WatchedAnimeList.Models
         public string AnimeNameEN { get; set; }
         public string ConnectedAnimeName { get; set; }
         public string Genre { get; set; }
+        public string WatchedEpisodes { get; set; }
 
         public int Rating { get; set; }
     }

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Path = System.IO.Path;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
@@ -33,6 +34,8 @@ using System.Collections.ObjectModel;
 using WatchedAnimeList.Helpers;
 using WatchedAnimeList.Models;
 using WatchedAnimeList.ViewModels;
+using System.Windows.Media.Effects;
+using MonoTorrent;
 
 namespace WatchedAnimeList.Controls
 {
@@ -55,13 +58,27 @@ namespace WatchedAnimeList.Controls
             {
                 Debug.Log(ex.ToString());
             }
+            DownloadedTitlesLoad();
         }
-
 
 
         #region xz
 
-        public void Huinya()
+        public void DownloadedTitlesLoad()
+        {
+            var titles = new List<string>();
+
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads");
+            if (!Directory.Exists(path))
+            {
+                DownloadedAnimeTitlesList.ItemsSource = new List<string>() {"NO Anime downloads"};
+                return;
+            }
+            titles = Directory.GetDirectories(path).ToList();
+
+            DownloadedAnimeTitlesList.ItemsSource = titles;
+        }
+        private void Huinya()
         {
             AnimeCardList.PreviewMouseWheel += (sender, e) =>
             {
@@ -182,7 +199,7 @@ namespace WatchedAnimeList.Controls
             return true;
         }
 
-        private async void AnimeNameFormating(string text)
+        private async Task<(string, string)> AnimeNameFormating(string text)
         {
             string name = "";
             string eng_Name = "";
@@ -220,9 +237,10 @@ namespace WatchedAnimeList.Controls
             if (WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(eng_Name))
             {
                 Debug.ShowAndLog($"Аніме вже існує: {eng_Name}");
-                return;
+                return ("", "");
             }
             CreateAnimeCard(eng_Name, name);
+            return (AnimeName, AnimeNameEN);
         }
 
         public async void CreateAnimeCard(string eng_Name, string name)
@@ -494,6 +512,63 @@ namespace WatchedAnimeList.Controls
         {
             AnimeCardInfoPanel.Visibility = Visibility.Collapsed;
             userConfirmationTask?.TrySetResult(false);
+        }
+
+        public void MenuMoreButton_Click(object sender, EventArgs e)
+        {
+            if (MoreOptionsMenuPanel.Visibility == Visibility.Collapsed)
+            {
+                var blur = new BlurEffect
+                {
+                    Radius = 5 // сила розмиття
+                };
+                ContentGrid.Effect = blur;
+                MoreOptionsMenuPanel.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                ContentGrid.Effect = null;
+                MoreOptionsMenuPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        public void MoreOptionsMenuExit_Clik(object sender, EventArgs e)
+        {
+            MoreOptionsMenuPanel.Visibility = Visibility.Collapsed;
+            ContentGrid.Effect = null;
+        }
+
+        public void OpenTitle_Click(object sender, EventArgs e)
+        {
+            string folderPath = (sender as Button)?.Tag as string;
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                string folderName = Path.GetFileName(folderPath);
+                string torrentPath = Path.Combine(folderPath, folderName + ".torrent");
+
+                if (File.Exists(torrentPath))
+                {
+                    WatchAnimePage page = new(torrentPath);
+                    MainWindow.Global.MainContent.Content = page;
+                }
+                else
+                {
+                    Debug.ShowAndLog("Торрент файл не знайдено.");
+                }
+            }
+        }
+
+
+        public void DownloadHistory_Button_Click(object sender, EventArgs e)
+        {
+            if (AnimeDownloads.Visibility == Visibility.Collapsed)
+            {
+                AnimeDownloads.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                AnimeDownloads.Visibility = Visibility.Collapsed;
+            }
         }
         #endregion
     }

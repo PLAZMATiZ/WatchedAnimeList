@@ -10,6 +10,7 @@
         AllowsTransparency="True">
 
     <Grid Name="RootGrid">
+
         <Grid Name="MainGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -67,7 +68,10 @@
                 </Grid>
             </Grid>
 
-            <Grid Name="MainPanel" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Grid Name="MainPanel" Grid.Row="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="AliceBlue"
+                  AllowDrop="True" 
+                  Drop="OnTorrentFileDropped"
+                  DragOver="OnDragOver">
                 <ContentControl x:Name="MainContent" />
             </Grid>
             <Grid Name="BottomPanel" Grid.Row="3" VerticalAlignment="Stretch" Background="#262626" HorizontalAlignment="Stretch" Margin="0,0,0,0">

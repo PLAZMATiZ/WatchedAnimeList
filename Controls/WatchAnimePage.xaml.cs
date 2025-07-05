@@ -1,116 +1,255 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using WatchedAnimeList.ViewModels;
+using System.Windows.Threading;
+using System.IO.Pipes;
+using System.Threading.Tasks;
 using WatchedAnimeList.Helpers;
 using Debug = WatchedAnimeList.Helpers.Debug;
-using System.IO;
 using System.Globalization;
-using System.Windows.Controls.Primitives;
-using MediaColor = System.Windows.Media.Color;
-using MediaRectangle = System.Windows.Shapes.Rectangle;
-using System.Windows.Threading;
-using Point = System.Windows.Point;
+using System.Windows.Data;
+using System.Text;
 
 
 namespace WatchedAnimeList.Controls
 {
-    /// <summary>
-    /// Interaction logic for WatchAnimePage.xaml
-    /// </summary>
     public partial class WatchAnimePage : System.Windows.Controls.UserControl
     {
-        private MpvPlayer player;
-
-        public WatchAnimePage()
+        public WatchAnimePage(string torrentFile)
         {
             InitializeComponent();
+            HandleTorrentDrop(torrentFile);
 
-            var playerWithButtons = new PlayerWithButtons();
-            host.Child = playerWithButtons;
-            host.MouseDown += playerWithButtons.BtnPause_Click;
-            player = playerWithButtons.player;
-
-            this.KeyDown += Window_KeyDown;
-            //
-            test();
+            _ = InitAsync(torrentFile);
         }
-        private async void test()
+        private async Task InitAsync(string torrentFile)
+        {
+            await HandleTorrentDrop(torrentFile);
+        }
+        private string animeFolderPath;
+        private string animeName = "";
+        private int episodeCount = 0;
+
+
+        private async Task HandleTorrentDrop(string torrentFile)
+        {
+            animeName = Path.GetFileNameWithoutExtension(torrentFile);
+            TitleTextBox.Text = animeName;
+
+            string savePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads", animeName);
+            animeFolderPath = savePath;
+            Directory.CreateDirectory(savePath);
+
+            try
+            {
+                File.Copy(torrentFile, Path.Combine(savePath, $"{animeName}.torrent"), overwrite: true);
+            }
+            catch { }
+
+            var downloader = new TorrentDownloader();
+            downloader.LogAction = (msg) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LogTextBox.Text = msg;
+                });
+            };
+
+            downloader.OnDownloadFinished += () =>
+            {
+                var episodes = Directory.GetFiles(animeFolderPath)
+                            .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                            .OrderBy(f => f)
+                            .ToList();
+
+                AnimeEpisodesList.ItemsSource = episodes;
+            };
+
+            downloader.OnEpisodeCountUpdated += (count) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    episodeCount = count;
+                    EpisodesCountText.Text = $"Серій: {episodeCount}";
+                });
+            };
+
+            await downloader.StartDownloadAsync(torrentFile, savePath);
+        }
+        private void PlayEpisode_Click(object sender, RoutedEventArgs e)
+        {
+            string path = (sender as Button)?.Tag as string;
+            if (!string.IsNullOrEmpty(path))
+            {
+                StartMpvPlayer(path);
+            }
+        }
+
+
+
+        #region  MPV
+        private NamedPipeClientStream pipeClient;
+        private StreamWriter writer;
+        private StreamReader reader;
+        private Process mpvProcess;
+        private const string PipeName = "mpvsocket";
+        private void StartMpvPlayer(string videoPath)
+        {
+            var mpvPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "mpv.exe");
+            var pipePath = $@"\\.\pipe\{PipeName}";
+
+            mpvProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = mpvPath,
+                    Arguments = $"--input-ipc-server={pipePath} \"{videoPath}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                },
+                EnableRaisingEvents = true
+            };
+            mpvProcess.Exited += MpvProcess_Exited;
+            mpvProcess.Start();
+            _ = ConnectToPipeAsync(); // пайп підключення окремо
+            q();
+        }
+
+        private async Task q()
         {
             await Task.Delay(1000);
-            string path = @"D:\_DOWN\Clevatess - AniLiberty [WEBRip 1080p]\Clevatess_[01].mkv";
-            if (!System.IO.File.Exists(path))
-                throw new FileNotFoundException("Відеофайл не знайдено", path);
-
-            player.Load(path);
+            ListenToMpvEvents();
         }
 
-        private void MainPage_Button_Click(object sender, EventArgs e)
+        private async Task ConnectToPipeAsync()
         {
-            MainWindow.Global.MainPage();
+            pipeClient = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
+            await pipeClient.ConnectAsync(3000);
+
+            writer = new StreamWriter(pipeClient) { AutoFlush = true };
+            reader = new StreamReader(pipeClient);
         }
 
-        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        private void MpvProcess_Exited(object sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                AddToWatched(); // виклич свій метод тут
+            });
+        }
+
+        private void AddToWatched()
+        {
+            // Твоя логіка — наприклад, додати назву в список
+            string title = TitleTextBox.Text.Trim();
+            Debug.Show($"✅ Додано до переглянутого: {title}");
+            // + запис у файл/базу, якщо треба
+        }
+
+        private async Task SendMpvCommand(string jsonCmd)
+        {
+            if (writer != null)
+                await writer.WriteLineAsync(jsonCmd);
+        }
+
+
+        private async Task SendCommandAsync(string jsonCmd)
+        {
+            if (writer != null)
+                await writer.WriteLineAsync(jsonCmd);
+        }
+
+        private HashSet<string> watchedFiles = new();
+
+        private async Task ListenToMpvEvents()
+        {
+            while (mpvProcess != null && !mpvProcess.HasExited)
+            {
+                try
+                {
+                    string line = await reader.ReadLineAsync();
+                    if (line != null && line.Contains("\"event\":"))
+                    {
+                        if (line.Contains("\"file-loaded\""))
+                        {
+                            string path = GetFilePathFromJson(line);
+                            if (!string.IsNullOrEmpty(path))
+                            {
+                                if (!watchedFiles.Contains(path))
+                                {
+                                    watchedFiles.Add(path);
+                                    Debug.Show($"👀 Переглянута серія: {Path.GetFileName(path)}");
+                                    //
+                                    //
+                                    //
+
+                                    //
+                                    //
+                                    // якшо переглянув
+
+                                    //
+                                    //
+                                    //
+                                    //
+                                }
+                                else
+                                {
+                                    Debug.Show($"↩️ Вже бачив: {Path.GetFileName(path)}");
+                                }
+                            }
+                        }
+                    }
+                }
+                catch { break; }
+            }
+        }
+
+        private string GetFilePathFromJson(string json)
         {
             try
             {
-                switch (e.Key)
+                var obj = System.Text.Json.JsonDocument.Parse(json);
+                if (obj.RootElement.TryGetProperty("event", out var evt) && evt.GetString() == "file-loaded")
                 {
-                    case System.Windows.Input.Key.D1:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode A (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D2:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_Soft_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode B (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D3:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode C (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D4:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode A+A (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D5:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_Soft_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Restore_CNN_Soft_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode B+B (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D6:
-                        player.ExecuteCommand(@"change-list glsl-shaders set ""~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_VL.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl""");
-                        player.ExecuteCommand(@"show-text ""Anime4K: Mode C+A (HQ)""");
-                        break;
-                    case System.Windows.Input.Key.D0:
-                        player.ExecuteCommand(@"change-list glsl-shaders set """"");
-                        player.ExecuteCommand(@"show-text ""GLSL shaders cleared""");
-                        break;
+                    if (obj.RootElement.TryGetProperty("prefix", out var prefix) &&
+                        obj.RootElement.TryGetProperty("data", out var data) &&
+                        data.TryGetProperty("path", out var path))
+                    {
+                        return path.GetString();
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                Debug.Show("Error executing shader command: " + ex.Message);
-            }
+            catch { }
+
+            return null;
         }
 
-        private void left_Click(object sender, EventArgs agr)
+
+        private void MainPage_Button_Click(object sender, RoutedEventArgs e)
         {
-            player.ExecuteCommand("seek -5 relative");
+            MainWindow.Global.MainPage();
         }
-        private void right_Click(object sender, EventArgs agr)
+        #endregion
+    }
+
+
+
+    public class FileNameConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            player.ExecuteCommand("seek 5 relative");
+            string path = value as string;
+            if (string.IsNullOrEmpty(path)) return "";
+            return Path.GetFileName(path);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

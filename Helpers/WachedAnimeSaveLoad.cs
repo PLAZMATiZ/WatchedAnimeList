@@ -177,8 +177,7 @@ namespace WatchedAnimeList.Helpers
 
             if (failed.Count != 0)
             {
-                Debug.Show($"FaledLOadIcon = {failed.Count}");
-
+                Debug.Log($"FaledLOadIcon = {failed.Count}");
             }
 
             // GoogleDrive
@@ -216,7 +215,7 @@ namespace WatchedAnimeList.Helpers
                 }
             });
 
-            Debug.Log($"В Google Drive знайдено: {addedItems.Count} аніме");
+            Debug.Log($"В Google Drive знайдено: {addedItems.Count} нових аніме");
             AnimeViewModel.Global.AnimeList.AddRange(
                 addedItems.Select(data => new AnimeItemViewModel(data, MainWindow.Global.mainPage.OnAnimeCardClicked))
             );

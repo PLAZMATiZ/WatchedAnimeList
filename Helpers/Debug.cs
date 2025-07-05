@@ -13,6 +13,7 @@ namespace WatchedAnimeList.Helpers
 
     public static class Debug
     {
+        public static Action<string> LogAction;
         private static readonly string logPath = "log.txt";
 
         public static void Show(string message, NotificationType type = NotificationType.Info, string title = "WAL")
@@ -33,8 +34,14 @@ namespace WatchedAnimeList.Helpers
         public static void Log(string message)
         {
             string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
+
+            // Запис в файл
             File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logPath), formatted);
+
+            // Відправка в UI, якщо підписалися
+            LogAction?.Invoke(formatted);
         }
+
 
         public static void ShowAndLog(string message, NotificationType type = NotificationType.Info)
         {

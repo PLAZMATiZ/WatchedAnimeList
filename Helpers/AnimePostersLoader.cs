@@ -10,6 +10,8 @@ using System.Windows.Media.Imaging;
 using WatchedAnimeList.Models;
 using System.Collections.Concurrent;
 using WatchedAnimeList.ViewModels;
+using Newtonsoft.Json.Linq;
+using System.Net.Http;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -65,8 +67,93 @@ namespace WatchedAnimeList.Helpers
             }
 
             await Task.WhenAll(tasks);
+            if(failed.Count != 0)
+            {
+                var f = await DownLoadImagesAsync(targetCollection, folderPath, failed);
+                Debug.Log($"Succesfully load {f.Count - failed.Count} / {failed.Count}");
+                return f;
+            }
             return failed;
         }
+        public static async Task<List<string>> DownLoadImagesAsync(ObservableCollection<AnimeItemViewModel> targetCollection, string folderPath, List<string> failed)
+        {
+            var semaphore = new SemaphoreSlim(4);
+            var tasks = new List<Task>();
+            var httpClient = new HttpClient();
+
+            Directory.CreateDirectory(folderPath);
+
+            // Фільтруємо лише ті, що в списку failed
+            var toDownload = targetCollection.Where(vm => failed.Contains(vm.AnimeNameEN)).ToList();
+
+            // Очищаємо failed перед новою спробою
+            failed.Clear();
+
+            foreach (var vm in toDownload)
+            {
+                await semaphore.WaitAsync();
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        try
+                        {
+                            var encodedName = Uri.EscapeDataString(vm.AnimeNameEN);
+                            var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
+                            var response = await httpClient.GetAsync(url);
+
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                lock (failed) failed.Add(vm.AnimeNameEN);
+                                return;
+                            }
+
+                            var json = await response.Content.ReadAsStringAsync();
+                            var jObj = JObject.Parse(json);
+                            var imageUrl = jObj["data"]?[0]?["images"]?["jpg"]?["image_url"]?.ToString();
+
+                            if (string.IsNullOrEmpty(imageUrl))
+                            {
+                                lock (failed) failed.Add(vm.AnimeNameEN);
+                                return;
+                            }
+
+                            var imageData = await httpClient.GetByteArrayAsync(imageUrl);
+
+                            var safeFileName = GetSafeImageFileName(vm.AnimeNameEN);
+                            var imagePath = Path.Combine(folderPath, safeFileName);
+                            await File.WriteAllBytesAsync(imagePath, imageData);
+
+                            using var stream = new MemoryStream(imageData);
+                            var bitmap = new BitmapImage();
+                            bitmap.BeginInit();
+                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                            bitmap.StreamSource = stream;
+                            bitmap.EndInit();
+                            bitmap.Freeze();
+
+                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                vm.AnimeImage = bitmap;
+                            });
+                        }
+                        catch
+                        {
+                            lock (failed) failed.Add(vm.AnimeNameEN);
+                        }
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }));
+            }
+
+            await Task.WhenAll(tasks);
+            return failed;
+        }
+
 
         public static async Task<List<string>> LoadImagesAsync(ObservableCollection<WachedAnimeData> targetCollection, string folderPath)
         {
