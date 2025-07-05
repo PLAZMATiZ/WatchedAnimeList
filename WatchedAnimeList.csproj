@@ -9,7 +9,7 @@
     <SupportedOSPlatformVersion>7.0</SupportedOSPlatformVersion>
     <ApplicationIcon>Assets\Icon.ico</ApplicationIcon>
     <PlatformTarget>x64</PlatformTarget>
-    <UseWindowsForms>False</UseWindowsForms>
+    <UseWindowsForms>True</UseWindowsForms>
     <GenerateApplicationEntryPoint>false</GenerateApplicationEntryPoint>
   </PropertyGroup>
 

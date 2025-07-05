@@ -127,7 +127,7 @@ namespace WatchedAnimeList.Helpers
             }
 
             AnimeViewModel.Global.AnimeList.AddRange(
-                wachedAnimeDict.Values.Select(data => new AnimeItemViewModel(data, MainWindow.Global.OnAnimeCardClicked))
+                wachedAnimeDict.Values.Select(data => new AnimeItemViewModel(data, MainWindow.Global.mainPage.OnAnimeCardClicked))
             );
 
 
@@ -218,7 +218,7 @@ namespace WatchedAnimeList.Helpers
 
             Debug.Log($"В Google Drive знайдено: {addedItems.Count} аніме");
             AnimeViewModel.Global.AnimeList.AddRange(
-                addedItems.Select(data => new AnimeItemViewModel(data, MainWindow.Global.OnAnimeCardClicked))
+                addedItems.Select(data => new AnimeItemViewModel(data, MainWindow.Global.mainPage.OnAnimeCardClicked))
             );
 
         }
