@@ -36,6 +36,9 @@ using WatchedAnimeList.Models;
 using WatchedAnimeList.ViewModels;
 using System.Windows.Media.Effects;
 using MonoTorrent;
+using System.Diagnostics;
+using Process = System.Diagnostics.Process;
+using Debug = WatchedAnimeList.Helpers.Debug;
 
 namespace WatchedAnimeList.Controls
 {
@@ -71,7 +74,7 @@ namespace WatchedAnimeList.Controls
             var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads");
             if (!Directory.Exists(path))
             {
-                DownloadedAnimeTitlesList.ItemsSource = new List<string>() {"NO Anime downloads"};
+                DownloadedAnimeTitlesText.Visibility = Visibility.Visible;
                 return;
             }
             titles = Directory.GetDirectories(path).ToList();
@@ -557,7 +560,31 @@ namespace WatchedAnimeList.Controls
                 }
             }
         }
-
+        public void DeleteTitle_Click(object sender, EventArgs e)
+        {
+            string folderPath = (sender as Button)?.Tag as string;
+            if (!string.IsNullOrEmpty(folderPath))
+            {
+                if (Directory.Exists(folderPath))
+                {
+                    Debug.Log($"Видалення скачаного аніме: {Path.GetFileName(folderPath)}");
+                    try
+                    {
+                        Directory.Delete(folderPath, true);
+                        DownloadedTitlesLoad();
+                        Debug.Log($"Успішне видалення");
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Log($"Помилка при видаленні: {ex}", NotificationType.Error);
+                    }
+                }
+                else
+                    Debug.Log($"Директорія для видалення не існує", NotificationType.Error);
+            }
+            else
+                Debug.Log("Шлях для видалення пустий", NotificationType.Error);
+        }
 
         public void DownloadHistory_Button_Click(object sender, EventArgs e)
         {
@@ -568,6 +595,32 @@ namespace WatchedAnimeList.Controls
             else
             {
                 AnimeDownloads.Visibility = Visibility.Collapsed;
+            }
+        }
+        public void UpdateApp_Button_Click(object sender, EventArgs e)
+        {
+            const string fileToDownload = "WAL_Updater.exe";
+
+            string localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileToDownload);
+
+            if (!File.Exists(localPath))
+            {
+                Debug.Log("Updater не знайдено за шляхом: " + localPath);
+                return;
+            }
+
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = localPath,
+                    UseShellExecute = true
+                });
+                Debug.Log("Запуск Updater");
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Помилка запуску Updater: {ex.Message}");
             }
         }
         #endregion

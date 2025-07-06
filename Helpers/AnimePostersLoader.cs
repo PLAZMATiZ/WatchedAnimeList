@@ -12,6 +12,7 @@ using System.Collections.Concurrent;
 using WatchedAnimeList.ViewModels;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
+using System.Security.Policy;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -77,82 +78,81 @@ namespace WatchedAnimeList.Helpers
         }
         public static async Task<List<string>> DownLoadImagesAsync(ObservableCollection<AnimeItemViewModel> targetCollection, string folderPath, List<string> failed)
         {
-            var semaphore = new SemaphoreSlim(4);
-            var tasks = new List<Task>();
             var httpClient = new HttpClient();
-
             Directory.CreateDirectory(folderPath);
-
-            // Фільтруємо лише ті, що в списку failed
             var toDownload = targetCollection.Where(vm => failed.Contains(vm.AnimeNameEN)).ToList();
-
-            // Очищаємо failed перед новою спробою
             failed.Clear();
+
+            int delayMs = 2000; // стартова затримка
+            int maxDelay = 10000;
 
             foreach (var vm in toDownload)
             {
-                await semaphore.WaitAsync();
+                var encodedName = Uri.EscapeDataString(vm.AnimeNameEN);
+                var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
 
-                tasks.Add(Task.Run(async () =>
+                try
                 {
-                    try
+                    await Task.Delay(delayMs);
+                    var response = await httpClient.GetAsync(url);
+
+                    if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                     {
-                        try
-                        {
-                            var encodedName = Uri.EscapeDataString(vm.AnimeNameEN);
-                            var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
-                            var response = await httpClient.GetAsync(url);
-
-                            if (!response.IsSuccessStatusCode)
-                            {
-                                lock (failed) failed.Add(vm.AnimeNameEN);
-                                return;
-                            }
-
-                            var json = await response.Content.ReadAsStringAsync();
-                            var jObj = JObject.Parse(json);
-                            var imageUrl = jObj["data"]?[0]?["images"]?["jpg"]?["image_url"]?.ToString();
-
-                            if (string.IsNullOrEmpty(imageUrl))
-                            {
-                                lock (failed) failed.Add(vm.AnimeNameEN);
-                                return;
-                            }
-
-                            var imageData = await httpClient.GetByteArrayAsync(imageUrl);
-
-                            var safeFileName = GetSafeImageFileName(vm.AnimeNameEN);
-                            var imagePath = Path.Combine(folderPath, safeFileName);
-                            await File.WriteAllBytesAsync(imagePath, imageData);
-
-                            using var stream = new MemoryStream(imageData);
-                            var bitmap = new BitmapImage();
-                            bitmap.BeginInit();
-                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                            bitmap.StreamSource = stream;
-                            bitmap.EndInit();
-                            bitmap.Freeze();
-
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                vm.AnimeImage = bitmap;
-                            });
-                        }
-                        catch
-                        {
-                            lock (failed) failed.Add(vm.AnimeNameEN);
-                        }
+                        Debug.Log($"[RATE LIMIT] {vm.AnimeNameEN} | Increasing delay to {delayMs + 1000}ms");
+                        delayMs = Math.Min(delayMs + 1000, maxDelay);
+                        failed.Add(vm.AnimeNameEN);
+                        continue;
                     }
-                    finally
+
+                    if (!response.IsSuccessStatusCode)
                     {
-                        semaphore.Release();
+                        Debug.Log($"[FAIL] {vm.AnimeNameEN} | Status: {response.StatusCode} | URL: {url}");
+                        failed.Add(vm.AnimeNameEN);
+                        continue;
                     }
-                }));
+
+                    var json = await response.Content.ReadAsStringAsync();
+                    var jObj = JObject.Parse(json);
+                    var imageUrl = jObj["data"]?[0]?["images"]?["jpg"]?["image_url"]?.ToString();
+
+                    if (string.IsNullOrEmpty(imageUrl))
+                    {
+                        Debug.Log($"[NO IMAGE] {vm.AnimeNameEN} | URL: {url}");
+                        failed.Add(vm.AnimeNameEN);
+                        continue;
+                    }
+
+                    var imageData = await httpClient.GetByteArrayAsync(imageUrl);
+                    var safeFileName = GetSafeImageFileName(vm.AnimeNameEN);
+                    var imagePath = Path.Combine(folderPath, safeFileName);
+                    await File.WriteAllBytesAsync(imagePath, imageData);
+
+                    using var stream = new MemoryStream(imageData);
+                    var bitmap = new BitmapImage();
+                    bitmap.BeginInit();
+                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+                    bitmap.Freeze();
+
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
+                        vm.AnimeImage = bitmap;
+                    });
+
+                    // зменш delay, якщо все ок
+                    delayMs = Math.Max(500, delayMs - 200);
+                }
+                catch (Exception ex)
+                {
+                    Debug.Log($"[EXCEPTION] {vm.AnimeNameEN} | {ex.Message} | URL: {url}");
+                    failed.Add(vm.AnimeNameEN);
+                }
             }
 
-            await Task.WhenAll(tasks);
             return failed;
         }
+
 
 
         public static async Task<List<string>> LoadImagesAsync(ObservableCollection<WachedAnimeData> targetCollection, string folderPath)

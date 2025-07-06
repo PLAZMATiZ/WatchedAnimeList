@@ -31,9 +31,9 @@ namespace WatchedAnimeList.Helpers
             System.Windows.MessageBox.Show(message, title, MessageBoxButton.OK, icon);
         }
 
-        public static void Log(string message)
+        public static void Log(string message, NotificationType type = NotificationType.Info)
         {
-            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}{Environment.NewLine}";
+            string formatted = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [{type}] {message}{Environment.NewLine}";
 
             // Запис в файл
             File.AppendAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, logPath), formatted);

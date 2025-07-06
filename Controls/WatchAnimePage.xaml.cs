@@ -61,21 +61,22 @@ namespace WatchedAnimeList.Controls
 
             downloader.OnDownloadFinished += () =>
             {
-                var episodes = Directory.GetFiles(animeFolderPath)
-                            .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                             .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
                             .OrderBy(f => f)
                             .ToList();
 
                 AnimeEpisodesList.ItemsSource = episodes;
             };
 
-            downloader.OnEpisodeCountUpdated += (count) =>
+            downloader.OnEpisodeCountUpdated += () =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    episodeCount = count;
-                    EpisodesCountText.Text = $"Серій: {episodeCount}";
-                });
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                             .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                            .OrderBy(f => f)
+                            .ToList();
+
+                AnimeEpisodesList.ItemsSource = episodes;
             };
 
             await downloader.StartDownloadAsync(torrentFile, savePath);

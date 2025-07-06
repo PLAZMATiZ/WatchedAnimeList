@@ -40,7 +40,7 @@
         <!-- Основна зона з логом -->
         <Grid Grid.Row="1" Background="#1e1e1e" AllowDrop="True">
             <Grid.RowDefinitions>
-                <RowDefinition Height="50"/>
+                <RowDefinition Height="120"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
