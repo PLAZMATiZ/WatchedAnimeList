@@ -136,12 +136,12 @@ namespace WatchedAnimeList.Controls
                 }
                 else
                 {
-                    Debug.Show("Даун шо за хуйня а не текст");
+                    Debug.Show("Не вдалося розпізнати назву/посилання");
                 }
             }
             else
             {
-                Debug.Show("Даун скопіюй нормально");
+                Debug.Show("Не вдалося розпізнати назву/посилання");
             }
         }
         private async Task SiteParse(string url)
@@ -173,7 +173,22 @@ namespace WatchedAnimeList.Controls
 
             if (AnimeNameEN == "" || AnimeName == "" || AnimeNameEN == null || AnimeName == null)
             {
-                Debug.Show("Силка хуйня");
+                //
+                //
+                //
+                //
+
+                ///      додай приклад норм силки
+
+                //
+                Debug.Show($"Помилка при отриманні данних з {url}, перевірте коректність силки"); 
+                //
+                //
+                //
+                //
+                //
+                //
+
                 return;
             }
             CreateAnimeCard(AnimeNameEN, AnimeName);
@@ -330,6 +345,7 @@ namespace WatchedAnimeList.Controls
 
             wachedAnimeData.AnimeNameEN = title;
             wachedAnimeData.AnimeName = animeName;
+            wachedAnimeData.WatchedDate = DateTime.Now.ToString();
 
             if (WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(title))
             {

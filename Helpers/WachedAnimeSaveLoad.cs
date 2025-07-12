@@ -32,7 +32,7 @@ namespace WatchedAnimeList.Helpers
             Directory.CreateDirectory(folderPath);
             Directory.CreateDirectory(Path.Combine(folderPath, "Anime Icons"));
 
-            NewLoad();
+            Load();
         }
 
         public WachedAnimeData GetAnimeByName(string name)
@@ -88,59 +88,6 @@ namespace WatchedAnimeList.Helpers
 
         public async void Load()
         {
-            var stopwatch = Stopwatch.StartNew(); // запускаємо таймер
-            WachedAnimeSaveDataCollection data = null;
-
-            var drive = new GoogleDriveHelper();
-            await drive.InitAsync();
-
-            string jsonText = await drive.DownloadJsonAsync("anime_data.json");
-
-            if (!string.IsNullOrWhiteSpace(jsonText))
-            {
-                data = TryDeserialize(jsonText);
-            }
-            else
-            {
-                string localPath = Path.Combine(folderPath, "anime_data.json");
-                if (File.Exists(localPath))
-                {
-                    string json = File.ReadAllText(localPath);
-                    data = TryDeserialize(json);
-                }
-            }
-
-            if (data == null || data.dataCollection == null)
-                return;
-
-            wachedAnimeDict.Clear();
-
-            foreach (var item in data.dataCollection)
-            {
-                var animeData = new WachedAnimeData
-                {
-                    AnimeName = item.AnimeName,
-                    AnimeNameEN = item.AnimeNameEN,
-                    Rating = item.Rating
-                };
-                wachedAnimeDict[animeData.AnimeNameEN] = animeData;
-            }
-
-            AnimeViewModel.Global.AnimeList.AddRange(
-                wachedAnimeDict.Values.Select(data => new AnimeItemViewModel(data, MainWindow.Global.mainPage.OnAnimeCardClicked))
-            );
-
-
-            stopwatch = Stopwatch.StartNew(); // запускаємо таймер
-            var failed = await AnimePostersLoader.LoadImagesAsync(AnimeViewModel.Global.AnimeList, Path.Combine(folderPath, "Anime Icons"));
-
-            Debug.Show($"FaledLOadIcon = {failed.Count}");
-            stopwatch.Stop(); // зупиняємо таймер
-            Debug.Show($"Завантаження зображень зайняло: {stopwatch.ElapsedMilliseconds} мс / {stopwatch.Elapsed.TotalSeconds:F2} секунд");
-        }
-
-        public async void NewLoad()
-        {
             WachedAnimeSaveDataCollection data = null;
 
             string localPath = Path.Combine(folderPath, "anime_data.json");
@@ -160,7 +107,8 @@ namespace WatchedAnimeList.Helpers
                 {
                     AnimeName = item.AnimeName,
                     AnimeNameEN = item.AnimeNameEN,
-                    Rating = item.Rating
+                    Rating = item.Rating,
+                    WatchedDate = item.WatchedDate
                 };
 
                 wachedAnimeDict[item.AnimeNameEN] = animeData;

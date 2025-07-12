@@ -81,11 +81,13 @@ namespace WatchedAnimeList.Helpers
                         await manager.SetFilePriorityAsync(f, Priority.Low);
 
                     await manager.SetFilePriorityAsync(next, Priority.High);
+
                     LogAction?.Invoke($"🔥 Тепер з пріоритетом: {next.Path}");
                 }
 
                 foreach (var file in videoFiles)
                 {
+                    OnEpisodeCountUpdated?.Invoke();
                     if (file.BitField.AllTrue && !completeLog.ToString().Contains(file.Path))
                         completeLog.AppendLine($"✅ Завантажено: {file.Path}");
                 }

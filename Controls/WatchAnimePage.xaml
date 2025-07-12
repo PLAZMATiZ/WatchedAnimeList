@@ -47,7 +47,7 @@
             <TextBox Grid.Row="0" x:Name="LogTextBox" FontFamily="Consolas" FontSize="14" IsReadOnly="True" 
                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="Лог..." 
                      VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" 
-                     VerticalAlignment="Center" Background="#1e1e1e" Foreground="#e5e5e5"/>
+                     VerticalAlignment="Center" Background="#1e1e1e" Foreground="#e5e5e5" Margin="16,0,0,0"/>
 
             <Grid Grid.Row="1">
                 <ListBox x:Name="AnimeEpisodesList"
