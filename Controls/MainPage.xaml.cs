@@ -97,7 +97,6 @@ namespace WatchedAnimeList.Controls
             };
 
         }
-        // Допоміжний метод для пошуку ScrollViewer всередині ListBox
         public static T? FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
@@ -487,7 +486,7 @@ namespace WatchedAnimeList.Controls
                 var viewModel = new AnimeItemViewModel(data, OnAnimeCardClicked);
                 AnimeViewModel.Global.AnimeList.Add(viewModel);
             }
-
+            
             WachedAnimeSaveLoad.Global.Save();
         }
 

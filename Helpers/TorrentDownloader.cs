@@ -1,146 +1,146 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using MonoTorrent;
+﻿using System.Threading.Tasks;
 using MonoTorrent.Client;
-using MonoTorrent.PiecePicking;
+using WatchedAnimeList.Controls;
+using System.IO;
+using System.Text.Json;
+using WatchedAnimeList.Models;
 
 namespace WatchedAnimeList.Helpers
 {
-    public class TorrentDownloader
+    public static class TorrentDownloader
     {
-        private ClientEngine engine;
-        private TorrentManager manager;
-        public event Action OnEpisodeCountUpdated;
-        public event Action OnDownloadFinished;
-        public Action<string> LogAction;
+        private static ClientEngine engine = new(new EngineSettings());
+        private static Dictionary<string, TorrentDownloadJob> jobs = new();
 
-        public TorrentDownloader()
+        public static async Task StartDownloadAsync(string torrentFilePath, string saveFolder, WatchAnimePage watchPage,
+            Action<string> logAction,
+            Action onFinished,
+            Action onUpdate)
         {
-            engine = new ClientEngine(new EngineSettings());
-        }
-
-        public async Task StartDownloadAsync(string torrentFilePath, string saveFolder)
-        {
-            if (!File.Exists(torrentFilePath))
-                throw new FileNotFoundException("Торрент не знайдено", torrentFilePath);
-
-            Directory.CreateDirectory(saveFolder);
-            manager = await engine.AddAsync(torrentFilePath, saveFolder);
-
-            await manager.ChangePickerAsync(new StreamingPieceRequester());
-
-            var videoFiles = manager.Files
-                .Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4"))
-                .OrderBy(f => ExtractEpisodeNumber(f.Path))
-                .ToList();
-
-            if (!videoFiles.Any())
+            if (jobs.ContainsKey(saveFolder))
             {
-                LogAction?.Invoke("❌ Не знайдено відеофайлів для завантаження.");
+                logAction?.Invoke($"⚠️ Завантаження вже йде для: {saveFolder}");
                 return;
             }
 
-            // Групований лог старту
-            var startLog = new System.Text.StringBuilder();
-            startLog.AppendLine("🎯 Починаю качати файли:");
-            foreach (var file in videoFiles)
+            var job = new TorrentDownloadJob(engine)
             {
-                OnEpisodeCountUpdated?.Invoke();
-                startLog.AppendLine($"— {file.Path}");
-            }
-            LogAction?.Invoke(startLog.ToString());
+                LogAction = logAction
+            };
 
-            // Встановлюємо DoNotDownload всім
-            foreach (var f in manager.Files)
-                await manager.SetFilePriorityAsync(f, Priority.DoNotDownload);
+            job.OnDownloadFinished += onFinished;
+            job.OnEpisodeCountUpdated += onUpdate;
 
-            // Встановлюємо Low всім відеофайлам
-            foreach (var f in videoFiles)
-                await manager.SetFilePriorityAsync(f, Priority.Low);
+            await job.AddDownloadAsync(torrentFilePath, saveFolder);
+            var availableEpisodes = job.GetAvailableEpisodes();
 
-            // Перший нескачаний — High
-            var firstIncomplete = videoFiles.FirstOrDefault(f => !f.BitField.AllTrue);
-            if (firstIncomplete != null)
-                await manager.SetFilePriorityAsync(firstIncomplete, Priority.High);
+            foreach (var ep in availableEpisodes)
+                watchPage.AddEpisodeToggle(ep);
 
-            await manager.StartAsync();
-
-            var completeLog = new System.Text.StringBuilder();
-
-            while (videoFiles.Any(f => !f.BitField.AllTrue))
+            string configPath = Path.Combine(saveFolder, "downloadConfig.json");
+            if (File.Exists(configPath))
             {
-                LogStatus();
-
-                var next = videoFiles.FirstOrDefault(f => !f.BitField.AllTrue);
-                if (next != null && next.Priority != Priority.High)
+                var config = JsonSerializer.Deserialize<DownloadConfig>(File.ReadAllText(configPath));
+                if (config?.SelectedEpisodes == null)
                 {
-                    foreach (var f in videoFiles)
-                        await manager.SetFilePriorityAsync(f, Priority.Low);
-
-                    await manager.SetFilePriorityAsync(next, Priority.High);
-
-                    LogAction?.Invoke($"🔥 Тепер з пріоритетом: {next.Path}");
+                    Debug.Log("download config is null", NotificationType.Error);
                 }
-
-                foreach (var file in videoFiles)
+                else
                 {
-                    OnEpisodeCountUpdated?.Invoke();
-                    if (file.BitField.AllTrue && !completeLog.ToString().Contains(file.Path))
-                        completeLog.AppendLine($"✅ Завантажено: {file.Path}");
+                    logAction?.Invoke($"🔽 Продовжую качати: {string.Join(", ", config.SelectedEpisodes)}");
+                    await job.StartDownloadAsync(config.SelectedEpisodes);
                 }
-
-                await Task.Delay(1000);
             }
 
-            LogAction?.Invoke(completeLog.ToString());
-            LogAction?.Invoke("🏁 Усі відеофайли завантажено.");
-            OnDownloadFinished?.Invoke();
-
-            MainWindow.Global.mainPage?.DownloadedTitlesLoad();
-        }
-
-        private int ExtractEpisodeNumber(string fileName)
-        {
-            // шукаємо [число] у імені
-            var start = fileName.LastIndexOf('[');
-            var end = fileName.LastIndexOf(']');
-
-            if (start >= 0 && end > start)
+            else
             {
-                var numStr = fileName.Substring(start + 1, end - start - 1);
-                if (int.TryParse(numStr, out int ep))
-                    return ep;
-            }
+                watchPage.ShowSelectEpisodes();
+                await watchPage.WaitForUserClickAsync();
+                watchPage.HideSelectEpisodes();
 
-            return int.MaxValue; // якщо не знайшли номер — кладемо в кінець
+                var episodesToDownload = watchPage.GetEpisodesToDownload();
+                var json = JsonSerializer.Serialize(new DownloadConfig() { SelectedEpisodes = episodesToDownload.ToList() }, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(Path.Combine(saveFolder, "downloadConfig.json"), json);
+
+
+                jobs[saveFolder] = job;
+                await job.StartDownloadAsync(episodesToDownload);
+            }
         }
 
-
-        private void LogStatus()
+        public static async Task ContinueDownloadFeedback(string saveFolder, WatchAnimePage watchPage,
+            Action<string> logAction, Action onFinished, Action onUpdate)
         {
-            var log = new System.Text.StringBuilder();
-
-            double totalSpeed = manager.Monitor.DownloadSpeed / 1024.0;
-            log.AppendLine($"⬇️ Загальна швидкість: {totalSpeed:F2} KB/s");
-            log.AppendLine("📂 Статус файлів:");
-
-            foreach (var file in manager.Files.Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4")))
+            if (!jobs.TryGetValue(saveFolder, out var job))
             {
-                long size = file.Length;
-                long downloaded = file.BytesDownloaded();
-                double progress = size > 0 ? (downloaded / (double)size) * 100.0 : 0;
-                double mbDownloaded = downloaded / (1024.0 * 1024.0);
-                double mbSize = size / (1024.0 * 1024.0);
-                string priority = file.Priority.ToString();
-
-                log.AppendLine($"— {Path.GetFileName(file.Path)}: {mbDownloaded:F2} / {mbSize:F2} MB | {progress:F1}% | prioryty: {priority}");
+                logAction?.Invoke($"❌ Нема активного завантаження для: {saveFolder}");
+                return;
             }
 
-            LogAction?.Invoke(log.ToString());
+            job.LogAction = logAction;
+
+            // Перепідключаємо евенти
+            job.OnDownloadFinished += onFinished;
+            job.OnEpisodeCountUpdated += onUpdate;
+
+            logAction?.Invoke($"🔄 Відновлено підключення до завантаження: {job.manager.Torrent.Name}");
+
+            // Показати вже активні епізоди
+            var episodes = job.GetAvailableEpisodes();
+            foreach (var ep in episodes)
+                watchPage.AddEpisodeToggle(ep);
+
+            string configPath = Path.Combine(saveFolder, "downloadConfig.json");
+            if (File.Exists(configPath))
+            {
+                var config = JsonSerializer.Deserialize<DownloadConfig>(File.ReadAllText(configPath));
+                if (config == null || config.SelectedEpisodes == null)
+                {
+                    Debug.Log("download config is null", NotificationType.Error);
+                }
+                else
+                {
+                    logAction?.Invoke($"🔽 Продовжую качати: {string.Join(", ", config.SelectedEpisodes)}");
+                    await job.StartDownloadAsync(config.SelectedEpisodes);
+                }
+            }
+            else
+            {
+                watchPage.ShowSelectEpisodes();
+                await watchPage.WaitForUserClickAsync();
+                watchPage.HideSelectEpisodes();
+
+                var needEpisodesToDownload = watchPage.GetEpisodesToDownload();
+                logAction?.Invoke($"🔽 Продовжую качати: {string.Join(", ", needEpisodesToDownload)}");
+
+                // Зміна пріоритетів на вже активному менеджері
+                await job.StartDownloadAsync(needEpisodesToDownload);
+            }
         }
 
+
+        public static void RemoveManager(string path)
+        {
+            if (jobs.ContainsKey(path))
+            {
+                jobs[path].StopDownloadAsync();
+            }
+            else
+            {
+                Debug.Log($"Незнайдено TorrentDownloadJob для {path}");
+            }
+        }
+
+        public static bool IsDownloading(string path) => jobs.ContainsKey(path);
+
+        public static async Task StopAllAsync()
+        {
+            foreach (var job in jobs.Values)
+                await job.StopDownloadAsync();
+
+            jobs.Clear();
+            engine.Dispose();
+        }
     }
+
 }
