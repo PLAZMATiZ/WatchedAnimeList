@@ -97,7 +97,6 @@ namespace WatchedAnimeList.Controls
             };
 
         }
-        // Допоміжний метод для пошуку ScrollViewer всередині ListBox
         public static T? FindVisualChild<T>(DependencyObject obj) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(obj); i++)
@@ -136,12 +135,12 @@ namespace WatchedAnimeList.Controls
                 }
                 else
                 {
-                    Debug.Show("Даун шо за хуйня а не текст");
+                    Debug.Show("Не вдалося розпізнати назву/посилання");
                 }
             }
             else
             {
-                Debug.Show("Даун скопіюй нормально");
+                Debug.Show("Не вдалося розпізнати назву/посилання");
             }
         }
         private async Task SiteParse(string url)
@@ -173,7 +172,22 @@ namespace WatchedAnimeList.Controls
 
             if (AnimeNameEN == "" || AnimeName == "" || AnimeNameEN == null || AnimeName == null)
             {
-                Debug.Show("Силка хуйня");
+                //
+                //
+                //
+                //
+
+                ///      додай приклад норм силки
+
+                //
+                Debug.Show($"Помилка при отриманні данних з {url}, перевірте коректність силки"); 
+                //
+                //
+                //
+                //
+                //
+                //
+
                 return;
             }
             CreateAnimeCard(AnimeNameEN, AnimeName);
@@ -330,6 +344,7 @@ namespace WatchedAnimeList.Controls
 
             wachedAnimeData.AnimeNameEN = title;
             wachedAnimeData.AnimeName = animeName;
+            wachedAnimeData.WatchedDate = DateTime.Now.ToString();
 
             if (WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(title))
             {
@@ -471,7 +486,7 @@ namespace WatchedAnimeList.Controls
                 var viewModel = new AnimeItemViewModel(data, OnAnimeCardClicked);
                 AnimeViewModel.Global.AnimeList.Add(viewModel);
             }
-
+            
             WachedAnimeSaveLoad.Global.Save();
         }
 

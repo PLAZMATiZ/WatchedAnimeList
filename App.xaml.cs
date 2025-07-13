@@ -19,23 +19,41 @@ namespace WatchedAnimeList
     /// </summary>
     public partial class App : System.Windows.Application
     {
-        
         [STAThread]
         public static void Main()
         {
-            Debug.Log("=== WAL starting via Main() ===");
-
-            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            try
             {
-                Debug.Log($"[UnhandledException] {e.ExceptionObject}\n");
-            };
+                Debug.Log("=== WAL starting via Main() ===");
 
-            WatchedAnimeList.App app = new WatchedAnimeList.App();
-            app.InitializeComponent();
-            app.Startup += app.Application_Startup;
-            app.Run();
+                AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                {
+                    Debug.Log($"[UnhandledException] {e.ExceptionObject}\n", NotificationType.Error);
+                };
+
+                TaskScheduler.UnobservedTaskException += (s, e) =>
+                {
+                    Debug.Log($"[Task Exception] {e.Exception}", NotificationType.Error);
+                    e.SetObserved();
+                };
+
+                var app = new WatchedAnimeList.App();
+
+                System.Windows.Application.Current.DispatcherUnhandledException += (s, e) =>
+                {
+                    Debug.Log($"[UI Exception] {e.Exception}", NotificationType.Error);
+                    e.Handled = true;
+                };
+
+                app.InitializeComponent();
+                app.Startup += app.Application_Startup;
+                app.Run();
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"[MAIN try-catch] {ex}", NotificationType.Error);
+            }
         }
-
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             try

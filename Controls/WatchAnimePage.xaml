@@ -47,7 +47,7 @@
             <TextBox Grid.Row="0" x:Name="LogTextBox" FontFamily="Consolas" FontSize="14" IsReadOnly="True" 
                      VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="Wrap" Text="Лог..." 
                      VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" HorizontalAlignment="Left" 
-                     VerticalAlignment="Center" Background="#1e1e1e" Foreground="#e5e5e5"/>
+                     VerticalAlignment="Center" Background="#1e1e1e" Foreground="#e5e5e5" Margin="16,0,0,0"/>
 
             <Grid Grid.Row="1">
                 <ListBox x:Name="AnimeEpisodesList"
@@ -69,6 +69,24 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Grid>
+        </Grid>
+        <Grid x:Name="SelectEpisodesToDownloadPanel" Grid.Row="1" Visibility="Collapsed">
+            <Border HorizontalAlignment="Center" VerticalAlignment="Center" MinWidth="320" MinHeight="320" Background="Red">
+                <Grid>
+                    <StackPanel>
+                        <Border BorderBrush="#34363a" BorderThickness="2" Background="#1e1e1e"  MinWidth="200" Height="50" Margin="6,12,6,6" CornerRadius="10">
+                            <Label Content="Вибір епізодів" Foreground="#fafafa" FontSize="24" VerticalAlignment="Center" HorizontalAlignment="Center" FontFamily="Segoe Print"/>
+                        </Border>
+                        <StackPanel x:Name="EpisodeToDownload_StackPanel">
+                        </StackPanel>
+                        <Border BorderBrush="#34363a" BorderThickness="2" Background="#1e1e1e"  Width="200" Height="50" Margin="6,12,6,6" CornerRadius="10" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource StyledButton}" Name="AddAnimeButton" Click="DownloadEpisodes_Button_Click"  Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" FontFamily="Segoe Print" FontSize="16">
+                                <Label Content="Скачати" Foreground="#fafafa" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                            </Button>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </Border>
         </Grid>
     </Grid>
 </UserControl>
