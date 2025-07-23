@@ -497,15 +497,36 @@ namespace WatchedAnimeList.Controls
         }
         public void ReorderCards(IEnumerable<WachedAnimeData> reorderedList)
         {
-            AnimeViewModel.Global.AnimeList.Clear();
+            // 1. Створюємо словник для швидкого доступу до існуючих ViewModel
+            var existingItems = AnimeViewModel.Global.AnimeList
+                .ToDictionary(vm => vm.AnimeNameEN, vm => vm);
+
+            // 2. Створюємо новий список у потрібному порядку
+            var newOrder = new ObservableCollection<AnimeItemViewModel>();
+
             foreach (var data in reorderedList)
             {
-                var viewModel = new AnimeItemViewModel(data, OnAnimeCardClicked);
-                AnimeViewModel.Global.AnimeList.Add(viewModel);
+                if (existingItems.TryGetValue(data.AnimeNameEN, out var existingViewModel))
+                {
+                    newOrder.Add(existingViewModel);
+                }
+                else
+                {
+                    // Якщо немає існуючого — створюємо новий
+                    var newViewModel = new AnimeItemViewModel(data, OnAnimeCardClicked);
+                    newOrder.Add(newViewModel);
+                }
             }
-            
+
+            // 3. Оновлюємо колекцію в ViewModel
+            AnimeViewModel.Global.AnimeList.Clear();
+            foreach (var item in newOrder)
+                AnimeViewModel.Global.AnimeList.Add(item);
+
+            // 4. Зберігаємо
             WachedAnimeSaveLoad.Global.Save();
         }
+
 
         #endregion
 
