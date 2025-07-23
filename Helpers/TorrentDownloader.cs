@@ -4,12 +4,19 @@ using WatchedAnimeList.Controls;
 using System.IO;
 using System.Text.Json;
 using WatchedAnimeList.Models;
+using Microsoft.Win32.TaskScheduler.Fluent;
 
 namespace WatchedAnimeList.Helpers
 {
     public static class TorrentDownloader
     {
-        private static ClientEngine engine = new(new EngineSettings());
+        private static ClientEngine engine = new(
+            new EngineSettingsBuilder
+            {
+                CacheDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache")
+            }.ToSettings()
+        );
+
         private static Dictionary<string, TorrentDownloadJob> jobs = new();
 
         public static async Task StartDownloadAsync(string torrentFilePath, string saveFolder, WatchAnimePage watchPage,
@@ -17,6 +24,7 @@ namespace WatchedAnimeList.Helpers
             Action onFinished,
             Action onUpdate)
         {
+
             if (jobs.ContainsKey(saveFolder))
             {
                 logAction?.Invoke($"⚠️ Завантаження вже йде для: {saveFolder}");

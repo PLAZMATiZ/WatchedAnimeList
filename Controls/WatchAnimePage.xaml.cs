@@ -15,38 +15,45 @@ using System.Globalization;
 using System.Windows.Data;
 using System.Text.Json;
 using System.Windows.Controls.Primitives;
+using System.Text.RegularExpressions;
 
 
 namespace WatchedAnimeList.Controls
 {
     public partial class WatchAnimePage : System.Windows.Controls.UserControl
     {
-        public WatchAnimePage(string torrentFile)
+        public WatchAnimePage(string torrentFilePath, bool copyTorrent = true)
         {
             InitializeComponent();
-            HandleTorrentDrop(torrentFile);
 
-            _ = HandleTorrentDrop(torrentFile);
+            _ = HandleTorrentDrop(torrentFilePath, copyTorrent);
         }
         private string animeFolderPath;
         private string animeName = "";
-        private int episodeCount = 0;
+        private string episodeCount;
 
-        private async Task HandleTorrentDrop(string torrentFile)
+        private async Task HandleTorrentDrop(string torrentFilePath, bool copyTorrent)
         {
-            animeName = Path.GetFileNameWithoutExtension(torrentFile);
-            TitleTextBox.Text = animeName;
+            animeName = Path.GetFileNameWithoutExtension(torrentFilePath);
+            TitleNameFormater(animeName, out string name, out string episodes);
+            animeName = Regex.Replace(name, @" - .*?\[.*?\]$", "").Trim();
+
+            episodeCount = episodes;
+            TitleTextBox.Text = name;
 
             string downloadsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads", animeName);
             animeFolderPath = downloadsPath;
             Directory.CreateDirectory(downloadsPath);
 
-            try
+            string torrentPath = "";
+            if(copyTorrent)
             {
-                File.Copy(torrentFile, Path.Combine(downloadsPath, $"{animeName}.torrent"), overwrite: true);
+                torrentPath = await CopyTorrent(torrentFilePath, downloadsPath);
             }
-            catch { }
-
+            else
+            {
+                torrentPath = torrentFilePath;
+            }
             if (TorrentDownloader.IsDownloading(downloadsPath))
             {
                 await TorrentDownloader.ContinueDownloadFeedback(downloadsPath, this, logAction: (msg) =>
@@ -78,7 +85,7 @@ namespace WatchedAnimeList.Controls
             }
             else
             {
-                await TorrentDownloader.StartDownloadAsync(torrentFile, downloadsPath, this, logAction: (msg) =>
+                await TorrentDownloader.StartDownloadAsync(torrentPath, downloadsPath, this, logAction: (msg) =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -108,6 +115,17 @@ namespace WatchedAnimeList.Controls
 
         }
 
+        private async Task<string> CopyTorrent(string torrentFile, string downloadsPath)
+        {
+            var path = Path.Combine(downloadsPath, $"{animeName}.torrent");
+            try
+            {
+                File.Copy(torrentFile, path, overwrite: true);
+                return path;
+            }
+            catch { }
+            return "";
+        }
         private static TaskCompletionSource<bool> tcs;
         private readonly List<ToggleButton> downloadEpisodesToggles = new();
         public List<int> GetEpisodesToDownload()
@@ -217,13 +235,13 @@ namespace WatchedAnimeList.Controls
             mpvProcess.Exited += MpvProcess_Exited;
             mpvProcess.Start();
             _ = ConnectToPipeAsync(); // пайп підключення окремо
-            q();
+            _ = q();
         }
 
         private async Task q()
         {
-            await Task.Delay(1000);
-            ListenToMpvEvents();
+            await ConnectToPipeAsync();  // ⏳ чекаємо підключення до пайпу
+            await ListenToMpvEvents();   // 🔄 слухаємо події
         }
 
         private async Task ConnectToPipeAsync()
@@ -237,18 +255,42 @@ namespace WatchedAnimeList.Controls
 
         private void MpvProcess_Exited(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                AddToWatched(); // виклич свій метод тут
-            });
+
         }
 
-        private void AddToWatched()
+        private static void TitleNameFormater(string text, out string name, out string episodes)
         {
-            // Твоя логіка — наприклад, додати назву в список
-            string title = TitleTextBox.Text.Trim();
-            Debug.Show($"✅ Додано до переглянутого: {title}");
-            // + запис у файл/базу, якщо треба
+            string pattern = @"\[(\d+-\d+)\]";
+            Match match = Regex.Match(text, pattern);
+
+            if (match.Success)
+            {
+                episodes = match.Groups[1].Value;
+
+                name = Regex.Replace(text, pattern, "").Trim();
+            }
+            else
+            {
+                name = text.Trim();
+                episodes = string.Empty;
+            }
+        }
+
+        private int? GetEpisode(string name)
+        {
+            string pattern = @"\[(\d+)\]";
+            Match match = Regex.Match(name, pattern);
+
+            if (match.Success)
+            {
+                if (int.TryParse(match.Groups[1].Value, out int episode))
+                {
+                    // Видаляємо [число] з назви
+                    name = Regex.Replace(name, pattern, "").Trim();
+                    return episode;
+                }
+            }
+            return null;
         }
 
         private async Task SendMpvCommand(string jsonCmd)
@@ -277,29 +319,27 @@ namespace WatchedAnimeList.Controls
                     {
                         if (line.Contains("\"file-loaded\""))
                         {
-                            string path = GetFilePathFromJson(line);
+                            string path = await GetMpvProperty("path");
                             if (!string.IsNullOrEmpty(path))
                             {
                                 if (!watchedFiles.Contains(path))
                                 {
                                     watchedFiles.Add(path);
-                                    Debug.Show($"👀 Переглянута серія: {Path.GetFileName(path)}");
-                                    //
-                                    //
-                                    //
 
-                                    //
-                                    //
-                                    // якшо переглянув
+                                    var episodeName = Path.GetFileName(path);
 
-                                    //
-                                    //
-                                    //
-                                    //
+                                    var episode = GetEpisode(episodeName);
+                                    if(episode == null)
+                                    {
+                                        Debug.Log($"Не вдалося визначити серію", NotificationType.Error);
+                                        return;
+                                    }
+                                    Debug.Log($"Додаю епізод до переглянутого", NotificationType.Info);
+                                    MainPage.Global.AddEpisodeToWached(animeName, (int)episode);
                                 }
                                 else
                                 {
-                                    Debug.Show($"↩️ Вже бачив: {Path.GetFileName(path)}");
+                                    Debug.Log($"↩️ Вже бачив: {Path.GetFileName(path)}", NotificationType.Info);
                                 }
                             }
                         }
@@ -309,26 +349,22 @@ namespace WatchedAnimeList.Controls
             }
         }
 
-        private string GetFilePathFromJson(string json)
+        private async Task<string> GetMpvProperty(string property)
         {
-            try
+            var request = $"{{ \"command\": [\"get_property\", \"{property}\"] }}";
+            await writer.WriteLineAsync(request);
+
+            while (true)
             {
-                var obj = System.Text.Json.JsonDocument.Parse(json);
-                if (obj.RootElement.TryGetProperty("event", out var evt) && evt.GetString() == "file-loaded")
+                var response = await reader.ReadLineAsync();
+                if (response != null && response.Contains("\"data\""))
                 {
-                    if (obj.RootElement.TryGetProperty("prefix", out var prefix) &&
-                        obj.RootElement.TryGetProperty("data", out var data) &&
-                        data.TryGetProperty("path", out var path))
-                    {
-                        return path.GetString();
-                    }
+                    using var doc = JsonDocument.Parse(response);
+                    if (doc.RootElement.TryGetProperty("data", out var data))
+                        return data.GetString();
                 }
             }
-            catch { }
-
-            return null;
         }
-
 
         private void MainPage_Button_Click(object sender, RoutedEventArgs e)
         {

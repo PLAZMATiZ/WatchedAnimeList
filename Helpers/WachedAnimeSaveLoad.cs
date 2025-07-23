@@ -35,6 +35,24 @@ namespace WatchedAnimeList.Helpers
             Load();
         }
 
+        public void AddEpisode(string titleName, int episode)
+        {
+            string episodes = wachedAnimeDict[titleName].WatchedEpisodes ?? string.Empty;
+            var episodeList = episodes.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                                       .Select(e => e.Trim())
+                                       .ToList();
+
+            string episodeStr = episode.ToString();
+            if (!episodeList.Contains(episodeStr))
+            {
+                episodeList.Add(episodeStr);
+            }
+
+            wachedAnimeDict[titleName].WatchedEpisodes = string.Join(",", episodeList);
+            Debug.Log($"Епізод {episodeStr} додано до переглянутого");
+            Save();
+        }
+
         public WachedAnimeData GetAnimeByName(string name)
         {
             return wachedAnimeDict.TryGetValue(name, out var animeData) ? animeData : null;

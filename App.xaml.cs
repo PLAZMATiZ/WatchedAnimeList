@@ -28,12 +28,12 @@ namespace WatchedAnimeList
 
                 AppDomain.CurrentDomain.UnhandledException += (s, e) =>
                 {
-                    Debug.Log($"[UnhandledException] {e.ExceptionObject}\n", NotificationType.Error);
+                    Debug.ShowAndLog($"[UnhandledException] {e.ExceptionObject}\n", NotificationType.Error);
                 };
 
                 TaskScheduler.UnobservedTaskException += (s, e) =>
                 {
-                    Debug.Log($"[Task Exception] {e.Exception}", NotificationType.Error);
+                    Debug.ShowAndLog($"[Task Exception] {e.Exception}", NotificationType.Error);
                     e.SetObserved();
                 };
 
@@ -41,7 +41,7 @@ namespace WatchedAnimeList
 
                 System.Windows.Application.Current.DispatcherUnhandledException += (s, e) =>
                 {
-                    Debug.Log($"[UI Exception] {e.Exception}", NotificationType.Error);
+                    Debug.ShowAndLog($"[UI Exception] {e.Exception}", NotificationType.Error);
                     e.Handled = true;
                 };
 
@@ -118,6 +118,7 @@ namespace WatchedAnimeList
 
         private void OnExitClick(object sender, RoutedEventArgs e)
         {
+            WachedAnimeSaveLoad.Global.Save();
             Current.Shutdown();
         }
 

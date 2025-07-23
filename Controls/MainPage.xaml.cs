@@ -47,9 +47,11 @@ namespace WatchedAnimeList.Controls
     /// </summary>
     public partial class MainPage : System.Windows.Controls.UserControl
     {
+        public static MainPage Global;
         public MainPage()
         {
             InitializeComponent();
+            Global = this;
             try
             {
                 this.DataContext = new AnimeViewModel();
@@ -120,18 +122,22 @@ namespace WatchedAnimeList.Controls
         #region Buffer Button
         private void AddAnimeButton_Click(object sender, EventArgs e)
         {
+            string text = System.Windows.Clipboard.GetText();
+            AddAnimeToWatched(text);
+        }
+
+        public void AddAnimeToWatched(string name)
+        {
             if (System.Windows.Clipboard.ContainsText())
             {
-                string text = System.Windows.Clipboard.GetText();
-
-                if (SiteParser.Global.UrlValidate(text))
+                if (SiteParser.Global.UrlValidate(name))
                 {
-                    var animeInfo = SiteParse(text);
+                    var animeInfo = SiteParse(name);
                     return;
                 }
-                else if (TextVerify(text))
+                else if (TextVerify(name))
                 {
-                    AnimeNameFormating(text);
+                    _ = AnimeNameFormating(name);
                 }
                 else
                 {
@@ -143,6 +149,24 @@ namespace WatchedAnimeList.Controls
                 Debug.Show("Не вдалося розпізнати назву/посилання");
             }
         }
+
+        public async void AddEpisodeToWached(string titleName, int episode)
+        {
+            var anime = await GetAnimeTitle(titleName);
+            titleName = anime.Titles.FirstOrDefault(t => t.Type == "English")?.Title
+                     ?? anime.Titles.FirstOrDefault()?.Title
+                     ?? "Unnamed";
+
+            if (WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(titleName))
+            {
+                WachedAnimeSaveLoad.Global.AddEpisode(titleName, episode);
+            }
+            else
+            {
+                AddAnimeToWatched(titleName);
+            }
+        }
+
         private async Task SiteParse(string url)
         {
             string title = "";
@@ -195,7 +219,6 @@ namespace WatchedAnimeList.Controls
         private static bool TextVerify(string text)
         {
             int letters = 0;
-            //int slash = 0;
 
             foreach (char c in text)
             {
@@ -203,16 +226,10 @@ namespace WatchedAnimeList.Controls
                 {
                     letters++;
                 }
-                //else if (c == '/')
-                //{
-                //slash++;
-                //}
             }
 
             if (letters < 3)
                 return false;
-            //if (slash > 1)
-            //return false;
             return true;
         }
 
@@ -566,7 +583,7 @@ namespace WatchedAnimeList.Controls
 
                 if (File.Exists(torrentPath))
                 {
-                    WatchAnimePage page = new(torrentPath);
+                    WatchAnimePage page = new(torrentPath, false);
                     MainWindow.Global.MainContent.Content = page;
                 }
                 else

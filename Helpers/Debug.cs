@@ -46,7 +46,7 @@ namespace WatchedAnimeList.Helpers
         public static void ShowAndLog(string message, NotificationType type = NotificationType.Info)
         {
             Show(message, type);
-            Log(message);
+            Log(message, type);
         }
     }
 }
