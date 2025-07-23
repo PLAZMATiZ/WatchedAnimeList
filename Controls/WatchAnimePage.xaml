@@ -34,7 +34,7 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" Click="MainPage_Button_Click" Content="← Назад" Background="#2e2e2e" Foreground="#e5e5e5" />
             <TextBox Grid.Column="1" x:Name="TitleTextBox" FontSize="20" VerticalContentAlignment="Center" Text="Назва тайтлу" HorizontalContentAlignment="Center" Background="#2e2e2e" Foreground="#e5e5e5"/>
-            <TextBlock Grid.Column="2" x:Name="EpisodesCountText" FontSize="20" VerticalAlignment="Center" Foreground="White" Text="Серій: 0" TextAlignment="Right" Margin="10" HorizontalAlignment="Center"/>
+            <TextBlock Grid.Column="2" x:Name="EpisodesCountText" FontSize="20" VerticalAlignment="Center" Foreground="White" Text="Переглянуто серій: 0" TextAlignment="Right" Margin="10" HorizontalAlignment="Center"/>
         </Grid>
 
         <!-- Основна зона з логом -->

@@ -30,15 +30,36 @@ namespace WatchedAnimeList.Controls
         }
         private string animeFolderPath;
         private string animeName = "";
-        private string episodeCount;
 
+        private async void SetWachedEpisodes()
+        {
+            var anime = await MainPage.Global.GetAnimeTitle(animeName);
+            var titleName = anime.Titles.FirstOrDefault(t => t.Type == "English")?.Title
+                     ?? anime.Titles.FirstOrDefault()?.Title
+                     ?? "Unnamed";
+
+            if(WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(titleName))
+            {
+                var watchedEpisodes = WachedAnimeSaveLoad.Global.wachedAnimeDict[titleName].WatchedEpisodes;
+                string[] items = watchedEpisodes.Split(',');
+
+                int count = items.Length;
+                EpisodesCountText.Text = $"Переглянуто серій: {count.ToString()}";
+                Debug.Log("Оновлюю кількість переглянутих епізодів");
+            }
+            else
+            {
+                EpisodesCountText.Text = $"Переглянуто серій: 0";
+                Debug.Log("Оновлюю кількість переглянутих епізодів");
+            }
+        }
         private async Task HandleTorrentDrop(string torrentFilePath, bool copyTorrent)
         {
             animeName = Path.GetFileNameWithoutExtension(torrentFilePath);
             TitleNameFormater(animeName, out string name, out string episodes);
             animeName = Regex.Replace(name, @" - .*?\[.*?\]$", "").Trim();
+            SetWachedEpisodes();
 
-            episodeCount = episodes;
             TitleTextBox.Text = name;
 
             string downloadsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads", animeName);
@@ -336,6 +357,7 @@ namespace WatchedAnimeList.Controls
                                     }
                                     Debug.Log($"Додаю епізод до переглянутого", NotificationType.Info);
                                     MainPage.Global.AddEpisodeToWached(animeName, (int)episode);
+                                    SetWachedEpisodes();
                                 }
                                 else
                                 {
