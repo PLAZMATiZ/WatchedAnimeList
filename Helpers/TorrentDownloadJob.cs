@@ -18,14 +18,17 @@ namespace WatchedAnimeList.Helpers
         public Action<string> LogAction;
         public event Action OnEpisodeCountUpdated;
         public event Action OnDownloadFinished;
+        public bool downloadFinished = false;
+        public string saveFolder;
 
         public TorrentDownloadJob(ClientEngine engine)
         {
             this.engine = engine;
         }
 
-        public async Task AddDownloadAsync(string torrentFilePath, string saveFolder)
+        public async Task AddDownloadAsync(string torrentFilePath, string _saveFolder)
         {
+            saveFolder = _saveFolder;
             if (!File.Exists(torrentFilePath))
                 throw new FileNotFoundException("Торрент не знайдено", torrentFilePath);
 
@@ -114,11 +117,20 @@ namespace WatchedAnimeList.Helpers
             LogAction?.Invoke(completeLog.ToString());
             LogAction?.Invoke("🏁 Усі вибрані відеофайли завантажено.");
             OnDownloadFinished?.Invoke();
+            downloadFinished = true;
 
-            MainWindow.Global.mainPage?.DownloadedTitlesLoad();
+            MainWindow.Global.mainPage?.DownloadedTitlesUpdate();
+            TorrentDownloader.RemoveManager(saveFolder);
         }
 
-
+        public void FeedBackConnect()
+        {
+            if (downloadFinished)
+            {
+                LogAction?.Invoke("🏁 Усі вибрані відеофайли завантажено.");
+                OnEpisodeCountUpdated?.Invoke();
+            }
+        }
         private void LogStatus()
         {
             var log = new StringBuilder();

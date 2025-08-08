@@ -40,17 +40,27 @@ namespace WatchedAnimeList.Controls
 
             if(WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(titleName))
             {
-                var watchedEpisodes = WachedAnimeSaveLoad.Global.wachedAnimeDict[titleName].WatchedEpisodes;
-                string[] items = watchedEpisodes.Split(',');
+                WachedAnimeData animeData = null;
+                if (WachedAnimeSaveLoad.Global.wachedAnimeDict.TryGetValue(titleName, out animeData))
+                {
+                    if (animeData != null && animeData.WatchedEpisodes != null)
+                    {
+                        var watchedEpisodes = animeData.WatchedEpisodes;
+                        string[] items = watchedEpisodes.Split(',');
 
-                int count = items.Length;
-                EpisodesCountText.Text = $"Переглянуто серій: {count.ToString()}";
-                Debug.Log("Оновлюю кількість переглянутих епізодів");
+                        int count = items.Length;
+                        EpisodesCountText.Text = $"Переглянуто серій: {count} \n Остання серія {items.Last()}";
+                    }
+                    else
+                    {
+                        Debug.Log("Переглянутих епізодів не знайдено", NotificationType.Info);
+                        EpisodesCountText.Text = $"Переглянуто серій: 0";
+                    }
+                    Debug.Log("Оновлюю кількість переглянутих епізодів");
+                }
             }
             else
             {
-                EpisodesCountText.Text = $"Переглянуто серій: 0";
-                Debug.Log("Оновлюю кількість переглянутих епізодів");
             }
         }
         private async Task HandleTorrentDrop(string torrentFilePath, bool copyTorrent)
@@ -77,7 +87,7 @@ namespace WatchedAnimeList.Controls
             }
             if (TorrentDownloader.IsDownloading(downloadsPath))
             {
-                await TorrentDownloader.ContinueDownloadFeedback(downloadsPath, this, logAction: (msg) =>
+                await TorrentDownloader.DownloadFeedback(downloadsPath, this, logAction: (msg) =>
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
@@ -355,7 +365,7 @@ namespace WatchedAnimeList.Controls
                                         Debug.Log($"Не вдалося визначити серію", NotificationType.Error);
                                         return;
                                     }
-                                    Debug.Log($"Додаю епізод до переглянутого", NotificationType.Info);
+                                    Debug.Log($"Додаю епізод до переглянутого (еп.{(int)episode})", NotificationType.Info);
                                     MainPage.Global.AddEpisodeToWached(animeName, (int)episode);
                                     SetWachedEpisodes();
                                 }

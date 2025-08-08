@@ -63,13 +63,13 @@ namespace WatchedAnimeList.Controls
             {
                 Debug.Log(ex.ToString());
             }
-            DownloadedTitlesLoad();
+            DownloadedTitlesUpdate();
         }
 
 
         #region xz
 
-        public void DownloadedTitlesLoad()
+        public void DownloadedTitlesUpdate()
         {
             var titles = new List<string>();
 
@@ -165,6 +165,7 @@ namespace WatchedAnimeList.Controls
             {
                 AddAnimeToWatched(titleName);
             }
+            WachedAnimeSaveLoad.Global.Save();
         }
 
         private async Task SiteParse(string url)
@@ -435,7 +436,15 @@ namespace WatchedAnimeList.Controls
         public void OnAnimeCardClicked(string animeNameEN)
         {
             // Наприклад, відкриття деталей:
-            Debug.Show($"Натиснуто: {animeNameEN}");
+            string animeInfo = "";
+            var animeData = WachedAnimeSaveLoad.Global.GetAnimeByName(animeNameEN);
+
+            animeInfo += $"Назва: {animeNameEN} \n";
+            animeInfo += $"Жанр: {animeData.Genre} \n";
+            animeInfo += $"Власний рейтинг: {animeData.Rating} \n";
+            animeInfo += $"Дата перегляду: {animeData.WatchedDate} \n";
+            animeInfo += $"Переглянуті епізоди: {animeData.WatchedEpisodes} \n";
+            Debug.Show(animeInfo);
         }
 
 
@@ -605,6 +614,7 @@ namespace WatchedAnimeList.Controls
                 if (File.Exists(torrentPath))
                 {
                     WatchAnimePage page = new(torrentPath, false);
+
                     MainWindow.Global.MainContent.Content = page;
                 }
                 else
@@ -623,8 +633,9 @@ namespace WatchedAnimeList.Controls
                     Debug.Log($"Видалення скачаного аніме: {Path.GetFileName(folderPath)}");
                     try
                     {
+                        TorrentDownloader.RemoveManager(folderPath);
                         Directory.Delete(folderPath, true);
-                        DownloadedTitlesLoad();
+                        DownloadedTitlesUpdate();
                         Debug.Log($"Успішне видалення");
                     }
                     catch (Exception ex)

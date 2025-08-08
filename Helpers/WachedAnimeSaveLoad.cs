@@ -132,7 +132,18 @@ namespace WatchedAnimeList.Helpers
                 wachedAnimeDict[item.AnimeNameEN] = animeData;
             });
 
-            Action<string> onCardClick = name => Debug.Show($"Клік по {name}");
+            Action<string> onCardClick = name => 
+            {
+                string animeInfo = "";
+                var animeData = WachedAnimeSaveLoad.Global.GetAnimeByName(name);
+
+                animeInfo += $"Назва: {name} \n";
+                animeInfo += $"Жанр: {animeData.Genre} \n";
+                animeInfo += $"Власний рейтинг: {animeData.Rating} \n";
+                animeInfo += $"Дата перегляду: {animeData.WatchedDate} \n";
+                animeInfo += $"Переглянуті епізоди: {animeData.WatchedEpisodes} \n";
+                Debug.Show(animeInfo);
+            };
 
             var animeViewModels = wachedAnimeDict.Values
                 .Select(data => new AnimeItemViewModel(data, onCardClick));

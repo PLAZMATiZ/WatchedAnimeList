@@ -18,13 +18,11 @@ namespace WatchedAnimeList.Helpers
         );
 
         private static Dictionary<string, TorrentDownloadJob> jobs = new();
-
         public static async Task StartDownloadAsync(string torrentFilePath, string saveFolder, WatchAnimePage watchPage,
             Action<string> logAction,
             Action onFinished,
             Action onUpdate)
         {
-
             if (jobs.ContainsKey(saveFolder))
             {
                 logAction?.Invoke($"⚠️ Завантаження вже йде для: {saveFolder}");
@@ -59,7 +57,6 @@ namespace WatchedAnimeList.Helpers
                     await job.StartDownloadAsync(config.SelectedEpisodes);
                 }
             }
-
             else
             {
                 watchPage.ShowSelectEpisodes();
@@ -69,14 +66,11 @@ namespace WatchedAnimeList.Helpers
                 var episodesToDownload = watchPage.GetEpisodesToDownload();
                 var json = JsonSerializer.Serialize(new DownloadConfig() { SelectedEpisodes = episodesToDownload.ToList() }, new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(Path.Combine(saveFolder, "downloadConfig.json"), json);
-
-
-                jobs[saveFolder] = job;
                 await job.StartDownloadAsync(episodesToDownload);
             }
+            jobs[saveFolder] = job;
         }
-
-        public static async Task ContinueDownloadFeedback(string saveFolder, WatchAnimePage watchPage,
+        public static async Task DownloadFeedback(string saveFolder, WatchAnimePage watchPage,
             Action<string> logAction, Action onFinished, Action onUpdate)
         {
             if (!jobs.TryGetValue(saveFolder, out var job))
@@ -84,63 +78,36 @@ namespace WatchedAnimeList.Helpers
                 logAction?.Invoke($"❌ Нема активного завантаження для: {saveFolder}");
                 return;
             }
-
-            job.LogAction = logAction;
-
-            // Перепідключаємо евенти
-            job.OnDownloadFinished += onFinished;
-            job.OnEpisodeCountUpdated += onUpdate;
-
-            logAction?.Invoke($"🔄 Відновлено підключення до завантаження: {job.manager.Torrent.Name}");
+            Debug.Log($"Відновлення підключення до завантаження: {job.manager.Torrent.Name}", NotificationType.Info);
+            logAction?.Invoke($"🔄 Відновлення підключення до завантаження: {job.manager.Torrent.Name}");
 
             // Показати вже активні епізоди
             var episodes = job.GetAvailableEpisodes();
             foreach (var ep in episodes)
                 watchPage.AddEpisodeToggle(ep);
 
-            string configPath = Path.Combine(saveFolder, "downloadConfig.json");
-            if (File.Exists(configPath))
-            {
-                var config = JsonSerializer.Deserialize<DownloadConfig>(File.ReadAllText(configPath));
-                if (config == null || config.SelectedEpisodes == null)
-                {
-                    Debug.Log("download config is null", NotificationType.Error);
-                }
-                else
-                {
-                    logAction?.Invoke($"🔽 Продовжую качати: {string.Join(", ", config.SelectedEpisodes)}");
-                    await job.StartDownloadAsync(config.SelectedEpisodes);
-                }
-            }
-            else
-            {
-                watchPage.ShowSelectEpisodes();
-                await watchPage.WaitForUserClickAsync();
-                watchPage.HideSelectEpisodes();
+            job.LogAction += logAction;
+            job.OnDownloadFinished += onFinished;
+            job.OnEpisodeCountUpdated += onUpdate;
 
-                var needEpisodesToDownload = watchPage.GetEpisodesToDownload();
-                logAction?.Invoke($"🔽 Продовжую качати: {string.Join(", ", needEpisodesToDownload)}");
-
-                // Зміна пріоритетів на вже активному менеджері
-                await job.StartDownloadAsync(needEpisodesToDownload);
-            }
+            job.FeedBackConnect();
+            await Task.Delay(1);
         }
-
-
         public static void RemoveManager(string path)
         {
             if (jobs.ContainsKey(path))
             {
-                jobs[path].StopDownloadAsync();
+                _ = jobs[path].StopDownloadAsync();
             }
             else
             {
-                Debug.Log($"Незнайдено TorrentDownloadJob для {path}");
+                Debug.Log($"Незнайдено TorrentDownloadJob для {path}", NotificationType.Error);
             }
         }
-
-        public static bool IsDownloading(string path) => jobs.ContainsKey(path);
-
+        public static bool IsDownloading(string path)
+        {
+            return jobs.ContainsKey(path);
+        }
         public static async Task StopAllAsync()
         {
             foreach (var job in jobs.Values)
