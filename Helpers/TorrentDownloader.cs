@@ -33,6 +33,7 @@ namespace WatchedAnimeList.Helpers
             {
                 LogAction = logAction
             };
+            jobs[saveFolder] = job;
 
             job.OnDownloadFinished += onFinished;
             job.OnEpisodeCountUpdated += onUpdate;
@@ -68,7 +69,6 @@ namespace WatchedAnimeList.Helpers
                 File.WriteAllText(Path.Combine(saveFolder, "downloadConfig.json"), json);
                 await job.StartDownloadAsync(episodesToDownload);
             }
-            jobs[saveFolder] = job;
         }
         public static async Task DownloadFeedback(string saveFolder, WatchAnimePage watchPage,
             Action<string> logAction, Action onFinished, Action onUpdate)
