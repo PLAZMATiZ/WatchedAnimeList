@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
-using WatchedAnimeList.Controls;
 using WatchedAnimeList.Logic;
-using WatchedAnimeList.Models;
-using WatchedAnimeList.ViewModels;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -15,10 +8,13 @@ namespace WatchedAnimeList.Helpers
     {
         public static void Inithialize()
         {
-            new WachedAnimeSaveLoad().Initialize();
-            new SiteParser().Initialize();
-            new Settings();
+            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
+
+            Settings.Initialize();
+            AnimeManager.Initialize(folderPath);
+            LocalizationHelper.Initialize();
+            NotificationsHelper.Initialize();
         }
-        
     }
 }

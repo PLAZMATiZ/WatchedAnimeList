@@ -7,7 +7,7 @@ namespace WatchedAnimeList.ViewModels
 {
     public class AnimeViewModel
     {
-        public static AnimeViewModel Global;
+        public static AnimeViewModel Global = null!;
         public BulkObservableCollection<AnimeItemViewModel> AnimeList { get; } = new();
 
         public AnimeViewModel()

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Controls;
 
 using WatchedAnimeList.Helpers;
 using WatchedAnimeList.Controls;
@@ -9,7 +10,7 @@ namespace WatchedAnimeList
 {
     public partial class MainWindow : Window
     {
-        public static MainWindow Global;
+        public static MainWindow Global = null!;
         public MainPage mainPage;
         public MainWindow()
         {
@@ -26,15 +27,9 @@ namespace WatchedAnimeList
         {
             MainContent.Content = mainPage;
         }
-        public void GoToPage(string page)
+        public void GoToPage(UserControl page)
         {
-            switch(page)
-            {
-                case "MainPage":
-                    MainContent.Content = mainPage;
-                    break;
-            }
-
+            MainContent.Content = page;
         }
         #region UI Elements
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
@@ -83,13 +78,13 @@ namespace WatchedAnimeList
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-                string torrentFile = files.FirstOrDefault(f => f.EndsWith(".torrent"));
+                string? torrentFile = files.FirstOrDefault(f => f.EndsWith(".torrent"));
+                if (torrentFile is null)
+                    Debug.Ex("torrentFile is null");
 
-                if (torrentFile != null)
-                {
-                    WatchAnimePage page = new(torrentFile);
-                    MainContent.Content = page;
-                }
+                WatchAnimePage page = new(torrentFile);
+                MainContent.Content = page;
+                
             }
         }
 

@@ -18,69 +18,147 @@ namespace WatchedAnimeList.Helpers
 {
     public static class AnimePostersLoader
     {
-        public static async Task<List<string>> LoadImagesAsync(ObservableCollection<AnimeItemViewModel> targetCollection, string folderPath)
+        public static async Task<List<string>> LoadImagesAsync(
+            ConcurrentDictionary<string, WachedAnimeData> collection,
+            string folderPath,
+            int batchSize = 60)
         {
-            var semaphore = new SemaphoreSlim(4);
-            var failed = new List<string>();
-            var tasks = new List<Task>();
+            Directory.CreateDirectory(folderPath);
+            var failed = new ConcurrentBag<string>();
+            var httpClient = new HttpClient();
 
-            foreach (var vm in targetCollection.ToList())
+            // 1️⃣ Локальний кеш
+            foreach (var anime in collection.Values)
             {
-                await semaphore.WaitAsync();
+                if (string.IsNullOrEmpty(anime.AnimeNameEN))
+                {
+                    failed.Add("Unknown");
+                    continue;
+                }
 
-                tasks.Add(Task.Run(() =>
+                var safeFileName = GetSafeImageFileName(anime.AnimeNameEN);
+                var imagePath = Path.Combine(folderPath, safeFileName);
+
+                if (File.Exists(imagePath))
                 {
                     try
                     {
-                        var fileName = GetSafeImageFileName(vm.AnimeNameEN);
-                        var fullPath = Path.Combine(folderPath, fileName);
+                        using var stream = File.OpenRead(imagePath);
+                        var bitmap = new BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmap.StreamSource = stream;
+                        bitmap.EndInit();
+                        bitmap.Freeze();
+                        anime.AnimeImage = bitmap;
+                    }
+                    catch
+                    {
+                        failed.Add(anime.AnimeNameEN);
+                    }
+                }
+                else
+                {
+                    failed.Add(anime.AnimeNameEN);
+                }
+            }
 
-                        BitmapImage? bitmap = null;
-                        if (File.Exists(fullPath))
+            // 2️⃣ Батчеве завантаження з Jikan API
+            var toDownload = failed.ToList();
+            failed.Clear();
+
+            int delayMs = 2000;
+            int maxDelay = 10000;
+
+            for (int i = 0; i < toDownload.Count; i += batchSize)
+            {
+                var batch = toDownload.Skip(i).Take(batchSize).ToList();
+                var tasks = new List<Task>();
+
+                foreach (var name in batch)
+                {
+                    if (!collection.TryGetValue(name, out var anime)) continue;
+
+                    tasks.Add(Task.Run(async () =>
+                    {
+                        try
                         {
-                            using var stream = File.OpenRead(fullPath);
-                            bitmap = new BitmapImage();
+                            await Task.Delay(delayMs);
+                            var encodedName = Uri.EscapeDataString(name);
+                            var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
+
+                            var response = await httpClient.GetAsync(url);
+
+                            if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                            {
+                                delayMs = Math.Min(delayMs + 1000, maxDelay);
+                                failed.Add(name);
+                                return;
+                            }
+
+                            if (!response.IsSuccessStatusCode)
+                            {
+                                failed.Add(name);
+                                return;
+                            }
+
+                            var json = await response.Content.ReadAsStringAsync();
+                            var jObj = JObject.Parse(json);
+                            var imageUrl = jObj["data"]?[0]?["images"]?["jpg"]?["image_url"]?.ToString();
+
+                            if (string.IsNullOrEmpty(imageUrl))
+                            {
+                                failed.Add(name);
+                                return;
+                            }
+
+                            var imageData = await httpClient.GetByteArrayAsync(imageUrl);
+                            var safeFileName = GetSafeImageFileName(name);
+                            var imagePath = Path.Combine(folderPath, safeFileName);
+                            await File.WriteAllBytesAsync(imagePath, imageData);
+
+                            using var memStream = new MemoryStream(imageData);
+                            var bitmap = new BitmapImage();
                             bitmap.BeginInit();
                             bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                            bitmap.StreamSource = stream;
+                            bitmap.StreamSource = memStream;
                             bitmap.EndInit();
                             bitmap.Freeze();
-                        }
-                        else
-                        {
-                            lock (failed)
-                                failed.Add(vm.AnimeNameEN);
-                        }
 
-                        if (bitmap != null)
-                        {
-                            System.Windows.Application.Current.Dispatcher.Invoke(() =>
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
                             {
-                                vm.AnimeImage = bitmap;
+                                anime.AnimeImage = bitmap;
                             });
+
+                            delayMs = Math.Max(500, delayMs - 200); // зменш delay якщо успішно
                         }
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                }));
+                        catch
+                        {
+                            failed.Add(name);
+                        }
+                    }));
+                }
+
+                await Task.WhenAll(tasks);
             }
 
-            await Task.WhenAll(tasks);
-            if(failed.Count != 0)
-            {
-                var f = await DownLoadImagesAsync(targetCollection, folderPath, failed);
-                Debug.Log($"Succesfully load {f.Count - failed.Count} / {failed.Count}");
-                return f;
-            }
-            return failed;
+            return failed.ToList();
         }
+
+
         public static async Task<List<string>> DownLoadImagesAsync(ObservableCollection<AnimeItemViewModel> targetCollection, string folderPath, List<string> failed)
         {
             var httpClient = new HttpClient();
             Directory.CreateDirectory(folderPath);
-            var toDownload = targetCollection.Where(vm => failed.Contains(vm.AnimeNameEN)).ToList();
+
+            foreach (var vm in targetCollection.Where(x => x.AnimeNameEN == null))
+            {
+                Console.WriteLine($"[WARN] Null AnimeNameEN у {vm}");
+            }
+            var toDownload = targetCollection
+                .Where(vm => vm.AnimeNameEN != null && failed.Contains(vm.AnimeNameEN))
+                .ToList();
+
             failed.Clear();
 
             int delayMs = 2000; // стартова затримка
@@ -88,6 +166,9 @@ namespace WatchedAnimeList.Helpers
 
             foreach (var vm in toDownload)
             {
+                if (vm.AnimeNameEN is null)
+                    Debug.Ex("vm.AnimeNameEN is null");
+
                 var encodedName = Uri.EscapeDataString(vm.AnimeNameEN);
                 var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
 
@@ -151,79 +232,6 @@ namespace WatchedAnimeList.Helpers
             }
 
             return failed;
-        }
-
-
-
-        public static async Task<List<string>> LoadImagesAsync(ObservableCollection<WachedAnimeData> targetCollection, string folderPath)
-        {
-            var semaphore = new SemaphoreSlim(4);
-            var tempList = new List<WachedAnimeData>();
-            var failedLoadings = new ConcurrentBag<string>();
-            var tasks = new List<Task>();
-
-            foreach (var original in targetCollection.ToList())
-            {
-                await semaphore.WaitAsync();
-
-                tasks.Add(Task.Run(() =>
-                {
-                    try
-                    {
-                        var fileName = GetSafeImageFileName(original.AnimeNameEN);
-                        var fullPath = Path.Combine(folderPath, fileName);
-
-                        BitmapImage? bitmap = null;
-                        if (File.Exists(fullPath))
-                        {
-                            using var stream = File.OpenRead(fullPath);
-                            bitmap = new BitmapImage();
-                            bitmap.BeginInit();
-                            bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                            bitmap.StreamSource = stream;
-                            bitmap.EndInit();
-                            bitmap.Freeze();
-                        }
-                        else
-                        {
-                            // Якщо файл не знайдено, додаємо назву в failedLoadings
-                            failedLoadings.Add(original.AnimeNameEN);
-                        }
-
-                        var updated = new WachedAnimeData
-                        {
-                            AnimeName = original.AnimeName,
-                            AnimeNameEN = original.AnimeNameEN,
-                            Rating = original.Rating,
-                            ConnectedAnimeName = original.ConnectedAnimeName,
-                            Genre = original.Genre,
-                            AnimeImage = bitmap
-                        };
-
-                        lock (tempList)
-                        {
-                            tempList.Add(updated);
-                        }
-                    }
-                    finally
-                    {
-                        semaphore.Release();
-                    }
-                }));
-            }
-
-            await Task.WhenAll(tasks);
-
-            await System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                targetCollection.Clear();
-                foreach (var item in tempList)
-                {
-                    targetCollection.Add(item);
-                }
-            });
-
-            return failedLoadings.ToList();
         }
 
         public static string GetSafeImageFileName(string animeTitle)

@@ -5,27 +5,23 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using WatchedAnimeList.Logic;
 using WatchedAnimeList.Models;
-
+using WatchedAnimeList.Helpers;
 public class AnimeItemViewModel : INotifyPropertyChanged
 {
-    private BitmapImage? _animeImage;
-
     public WachedAnimeData Model { get; }
 
-    public string AnimeName => Model.AnimeName;
-    public string AnimeNameEN => Model.AnimeNameEN;
-    public int Rating => Model.Rating;
-    public string Genre => Model.Genre;
-    public string ConnectedAnimeName => Model.ConnectedAnimeName;
+    public string? AnimeName => Model.AnimeName;
+    public string? AnimeNameEN => Model.AnimeNameEN;
+    public string? Genres => Model.Genres;
 
     public BitmapImage? AnimeImage
     {
-        get => _animeImage;
+        get => Model.AnimeImage;
         set
         {
-            if (_animeImage != value)
+            if (Model.AnimeImage != value)
             {
-                _animeImage = value;
+                Model.AnimeImage = value;
                 OnPropertyChanged();
             }
         }
@@ -36,6 +32,9 @@ public class AnimeItemViewModel : INotifyPropertyChanged
     public AnimeItemViewModel(WachedAnimeData model, Action<string>? onClick = null)
     {
         Model = model;
+        if (AnimeNameEN is null)
+            Debug.Ex("AnimeNameEN is null");
+
         CardClickCommand = new RelayCommand(_ => onClick?.Invoke(AnimeNameEN));
     }
 
