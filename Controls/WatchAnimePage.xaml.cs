@@ -28,28 +28,31 @@ namespace WatchedAnimeList.Controls
 
             _ = HandleTorrentDrop(torrentFilePath, copyTorrent);
         }
-        private string animeFolderPath;
+        private string? animeFolderPath;
         private string animeName = "";
 
         private async void SetWachedEpisodes()
         {
-            var anime = await MainPage.Global.GetAnimeTitle(animeName);
+            var anime = await JikanHelper.GetAnime(animeName);
+            if (anime is null)
+                Debug.Ex("anime is null");
+
             var titleName = anime.Titles.FirstOrDefault(t => t.Type == "English")?.Title
                      ?? anime.Titles.FirstOrDefault()?.Title
                      ?? "Unnamed";
 
-            if(WachedAnimeSaveLoad.Global.wachedAnimeDict.ContainsKey(titleName))
+            if(AnimeManager.ContainsAnime(titleName))
             {
-                WachedAnimeData animeData = null;
-                if (WachedAnimeSaveLoad.Global.wachedAnimeDict.TryGetValue(titleName, out animeData))
+                WachedAnimeData? animeData = null;
+                if (AnimeManager.TryGetWachedAnimeData(titleName, out animeData))
                 {
-                    if (animeData != null && animeData.WatchedEpisodes != null)
+                    if (animeData != null && animeData.WatchedEpisodesSet != null)
                     {
-                        var watchedEpisodes = animeData.WatchedEpisodes;
-                        string[] items = watchedEpisodes.Split(',');
+                        var watchedEpisodes = animeData.WatchedEpisodesSet;
 
-                        int count = items.Length;
-                        EpisodesCountText.Text = $"Переглянуто серій: {count} \n Остання серія {items.Last()}";
+                        int count = watchedEpisodes.Count;
+                        string lastEp = watchedEpisodes.Any() ? watchedEpisodes.Last().ToString() : "N/A";
+                        EpisodesCountText.Text = $"Переглянуто серій: {count} \n Остання серія {lastEp}";
                     }
                     else
                     {
@@ -76,10 +79,13 @@ namespace WatchedAnimeList.Controls
             animeFolderPath = downloadsPath;
             Directory.CreateDirectory(downloadsPath);
 
-            string torrentPath = "";
+            string? torrentPath = "";
             if(copyTorrent)
             {
-                torrentPath = await CopyTorrent(torrentFilePath, downloadsPath);
+                torrentPath = CopyTorrent(torrentFilePath, downloadsPath);
+
+                if(torrentPath is null)
+                    Debug.Ex("torrentPath is null");
             }
             else
             {
@@ -146,7 +152,7 @@ namespace WatchedAnimeList.Controls
 
         }
 
-        private async Task<string> CopyTorrent(string torrentFile, string downloadsPath)
+        private string? CopyTorrent(string torrentFile, string downloadsPath)
         {
             var path = Path.Combine(downloadsPath, $"{animeName}.torrent");
             try
@@ -155,9 +161,9 @@ namespace WatchedAnimeList.Controls
                 return path;
             }
             catch { }
-            return "";
+            return null;
         }
-        private static TaskCompletionSource<bool> tcs;
+        private static TaskCompletionSource<bool>? tcs;
         private readonly List<ToggleButton> downloadEpisodesToggles = new();
         public List<int> GetEpisodesToDownload()
         {
@@ -182,9 +188,9 @@ namespace WatchedAnimeList.Controls
 
             var border = new Border
             {
-                BorderBrush = (Brush)new BrushConverter().ConvertFrom("#34363a"),
+                BorderBrush = (Brush)new BrushConverter().ConvertFrom("#34363a")!,
                 BorderThickness = new Thickness(2),
-                Background = (Brush)new BrushConverter().ConvertFrom("#1e1e1e"),
+                Background = (Brush)new BrushConverter().ConvertFrom("#1e1e1e")!,
                 Margin = new Thickness(6, 12, 6, 6),
                 CornerRadius = new CornerRadius(10),
 
@@ -232,7 +238,10 @@ namespace WatchedAnimeList.Controls
 
         private void PlayEpisode_Click(object sender, RoutedEventArgs e)
         {
-            string path = (sender as Button)?.Tag as string;
+            string? path = (sender as Button)?.Tag as string;
+            if (path is null)
+                Debug.Ex("path is null");
+
             if (!string.IsNullOrEmpty(path))
             {
                 StartMpvPlayer(path);
@@ -242,10 +251,10 @@ namespace WatchedAnimeList.Controls
 
 
         #region  MPV
-        private NamedPipeClientStream pipeClient;
-        private StreamWriter writer;
-        private StreamReader reader;
-        private Process mpvProcess;
+        private NamedPipeClientStream? pipeClient;
+        private StreamWriter? writer;
+        private StreamReader? reader;
+        private Process? mpvProcess;
         private const string PipeName = "mpvsocket";
         private void StartMpvPlayer(string videoPath)
         {
@@ -263,9 +272,7 @@ namespace WatchedAnimeList.Controls
                 },
                 EnableRaisingEvents = true
             };
-            mpvProcess.Exited += MpvProcess_Exited;
             mpvProcess.Start();
-            _ = ConnectToPipeAsync(); // пайп підключення окремо
             _ = q();
         }
 
@@ -282,11 +289,6 @@ namespace WatchedAnimeList.Controls
 
             writer = new StreamWriter(pipeClient) { AutoFlush = true };
             reader = new StreamReader(pipeClient);
-        }
-
-        private void MpvProcess_Exited(object sender, EventArgs e)
-        {
-
         }
 
         private static void TitleNameFormater(string text, out string name, out string episodes)
@@ -345,7 +347,10 @@ namespace WatchedAnimeList.Controls
             {
                 try
                 {
-                    string line = await reader.ReadLineAsync();
+                    if (reader is null)
+                        Debug.Ex("reader is null");
+
+                    string? line = await reader.ReadLineAsync();
                     if (line != null && line.Contains("\"event\":"))
                     {
                         if (line.Contains("\"file-loaded\""))
@@ -366,7 +371,7 @@ namespace WatchedAnimeList.Controls
                                         return;
                                     }
                                     Debug.Log($"Додаю епізод до переглянутого (еп.{(int)episode})", NotificationType.Info);
-                                    MainPage.Global.AddEpisodeToWached(animeName, (int)episode);
+                                    AnimeManager.AddEpisode(animeName, (int)episode);
                                     SetWachedEpisodes();
                                 }
                                 else
@@ -383,6 +388,11 @@ namespace WatchedAnimeList.Controls
 
         private async Task<string> GetMpvProperty(string property)
         {
+            if (writer is null)
+                Debug.Ex("reader is null");
+            if (reader is null)
+                Debug.Ex("reader is null");
+
             var request = $"{{ \"command\": [\"get_property\", \"{property}\"] }}";
             await writer.WriteLineAsync(request);
 
@@ -393,7 +403,13 @@ namespace WatchedAnimeList.Controls
                 {
                     using var doc = JsonDocument.Parse(response);
                     if (doc.RootElement.TryGetProperty("data", out var data))
-                        return data.GetString();
+                    {
+                        var mpvProperty = data.GetString();
+                        if (mpvProperty is null)
+                            Debug.Ex("mpvProperty is null");
+
+                        return mpvProperty;
+                    }
                 }
             }
         }
@@ -416,7 +432,7 @@ namespace WatchedAnimeList.Controls
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string path = value as string;
+            string? path = value as string;
             if (string.IsNullOrEmpty(path)) return "";
             return Path.GetFileName(path);
         }

@@ -8,20 +8,18 @@ using WatchedAnimeList.Helpers;
 
 namespace WatchedAnimeList.Logic
 {
-    public class Settings
+    public static class Settings
     {
-        public static Settings Global { get; private set; }
-        public IniFile iniFile;
-        private readonly Window window;
+        public static IniFile iniFile = null!;
+        private static Window window = null!;
 
-        public Settings()
+        public static void Initialize()
         {
             window = MainWindow.Global;
-            Global = this;
             LoadSettings();
         }
 
-        public void SaveSettings()
+        public static void SaveSettings()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
@@ -47,7 +45,7 @@ namespace WatchedAnimeList.Logic
             }
         }
 
-        public void LoadSettings()
+        public static void LoadSettings()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string filePath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList", "Settings.ini");
@@ -88,8 +86,8 @@ namespace WatchedAnimeList.Logic
 
     public class IniFile
     {
-        string Path;
-        string EXE = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
+        readonly string Path;
+        readonly string? EXE = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
 
         [DllImport("kernel32", CharSet = CharSet.Unicode)]
         static extern long WritePrivateProfileString(string Section, string Key, string Value, string FilePath);
@@ -97,34 +95,46 @@ namespace WatchedAnimeList.Logic
         [DllImport("kernel32", CharSet = CharSet.Unicode)]
         static extern int GetPrivateProfileString(string Section, string Key, string Default, StringBuilder RetVal, int Size, string FilePath);
 
-        public IniFile(string iniPath = null)
+        public IniFile(string? iniPath = null)
         {
             Path = new FileInfo(iniPath ?? EXE + ".ini").FullName;
         }
 
-        public string Read(string Key, string Section = null)
+        public string Read(string Key, string? Section = null)
         {
+            if (EXE is null)
+                Debug.Ex("EXE is null");
+
             var RetVal = new StringBuilder(255);
             GetPrivateProfileString(Section ?? EXE, Key, "", RetVal, 255, Path);
             return RetVal.ToString();
         }
 
-        public void Write(string Key, string Value, string Section = null)
+        public void Write(string Key, string Value, string? Section = null)
         {
+            if (EXE is null)
+                Debug.Ex("EXE is null");
+
             WritePrivateProfileString(Section ?? EXE, Key, Value, Path);
         }
 
-        public void DeleteKey(string Key, string Section = null)
+        public void DeleteKey(string Key, string? Section = null)
         {
-            Write(Key, null, Section ?? EXE);
+            if (EXE is null)
+                Debug.Ex("EXE is null");
+
+            Write(Key, string.Empty, Section ?? EXE);
         }
 
-        public void DeleteSection(string Section = null)
+        public void DeleteSection(string? Section = null)
         {
-            Write(null, null, Section ?? EXE);
+            if (EXE is null)
+                Debug.Ex("EXE is null");
+
+            Write(string.Empty, string.Empty, Section ?? EXE);
         }
 
-        public bool KeyExists(string Key, string Section = null)
+        public bool KeyExists(string Key, string? Section = null)
         {
             return Read(Key, Section).Length > 0;
         }

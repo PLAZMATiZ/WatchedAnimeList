@@ -21,16 +21,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ApplicationDefinition Remove="App.xaml"/>
-    <Page Include="App.xaml"/>
+    <ApplicationDefinition Remove="App.xaml" />
+    <Page Include="App.xaml" />
   </ItemGroup>
 
   <ItemGroup>
     <None Remove="Assets\aa.png" />
     <None Remove="Assets\defaultAnimeIcon.jpg" />
+    <None Remove="Assets\def_poster.jpg" />
     <None Remove="Assets\Icon.png" />
     <None Remove="Assets\Kage no Jitsuryokusha ni Naritakute!.jpg" />
     <None Remove="Assets\more.png" />
+    <None Remove="Assets\notifications.png" />
     <None Remove="Assets\Search.png" />
     <None Remove="Assets\settings.png" />
     <None Remove="credentials.json" />
@@ -57,12 +59,17 @@
     <Resource Include="Assets\aa.png" />
     <Resource Include="Assets\defaultAnimeIcon.jpg" />
     <EmbeddedResource Include="Assets\Icon.ico" />
+    <Resource Include="Assets\def_poster.jpg" />
     <Resource Include="Assets\Icon.png" />
     <Content Include="Assets\Search.png" />
+    <Resource Include="Assets\notifications.png" />
     <Resource Include="Assets\settings.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Languages\EN-GB.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="libmpv-2.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

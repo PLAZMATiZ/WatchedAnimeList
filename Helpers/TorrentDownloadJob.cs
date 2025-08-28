@@ -14,12 +14,12 @@ namespace WatchedAnimeList.Helpers
     public class TorrentDownloadJob
     {
         private readonly ClientEngine engine;
-        public TorrentManager manager;
-        public Action<string> LogAction;
-        public event Action OnEpisodeCountUpdated;
-        public event Action OnDownloadFinished;
+        public TorrentManager? manager;
+        public Action<string> LogAction = (a) => { };
+        public Action OnEpisodeCountUpdated = () => { };
+        public Action OnDownloadFinished = () => { };
         public bool downloadFinished = false;
-        public string saveFolder;
+        public string? saveFolder;
 
         public TorrentDownloadJob(ClientEngine engine)
         {
@@ -34,11 +34,23 @@ namespace WatchedAnimeList.Helpers
 
             Directory.CreateDirectory(saveFolder);
 
-            manager = await engine.AddAsync(torrentFilePath, saveFolder);
+            manager = await engine.AddAsync(torrentFilePath, saveFolder, new TorrentSettingsBuilder
+            {
+                UploadSlots = 16,
+                MaximumConnections = 1000, // макс піpів на цей торрент
+                AllowDht = true,
+                AllowPeerExchange = true,
+                MaximumDownloadRate = 0,
+                MaximumUploadRate = 0,
+                RequirePeerIdToMatch = false
+            }.ToSettings());
         }
 
         public List<int> GetAvailableEpisodes()
         {
+            if (manager is null)
+                Debug.Ex("manager is null");
+
             return manager.Files
                 .Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4"))
                 .Select(f => ExtractEpisodeNumber(f.Path))
@@ -50,7 +62,12 @@ namespace WatchedAnimeList.Helpers
 
         public async Task StartDownloadAsync(List<int> selectedEpisodes)
         {
-            await manager.ChangePickerAsync(new StreamingPieceRequester());
+            if (manager is null)
+                Debug.Ex("manager is null");
+
+            await manager.ChangePickerAsync(new StandardPieceRequester(new PieceRequesterSettings() { }));
+            //await manager.ChangePickerAsync(new HybridPieceRequester(manager));
+
 
             var videoFiles = manager.Files
             .Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4"))
@@ -59,7 +76,6 @@ namespace WatchedAnimeList.Helpers
             .OrderBy(x => x.Episode)
             .Select(x => x.File)
             .ToList();
-
 
             if (!videoFiles.Any())
             {
@@ -75,16 +91,15 @@ namespace WatchedAnimeList.Helpers
                 startLog.AppendLine($"\u2014 {file.Path}");
             }
             LogAction?.Invoke(startLog.ToString());
-
             foreach (var f in manager.Files)
                 await manager.SetFilePriorityAsync(f, Priority.DoNotDownload);
 
             foreach (var f in videoFiles)
                 await manager.SetFilePriorityAsync(f, Priority.Low);
 
-            var firstIncomplete = videoFiles.FirstOrDefault(f => !f.BitField.AllTrue);
-            if (firstIncomplete != null)
-                await manager.SetFilePriorityAsync(firstIncomplete, Priority.High);
+            var firstThreeIncomplete = videoFiles.Where(f => !f.BitField.AllTrue).Take(3);
+            foreach (var f in firstThreeIncomplete)
+                await manager.SetFilePriorityAsync(f, Priority.High);
 
             await manager.StartAsync();
 
@@ -94,15 +109,16 @@ namespace WatchedAnimeList.Helpers
             {
                 LogStatus();
 
-                var next = videoFiles.FirstOrDefault(f => !f.BitField.AllTrue);
-                if (next != null && next.Priority != Priority.High)
-                {
-                    foreach (var f in videoFiles)
-                        await manager.SetFilePriorityAsync(f, Priority.Low);
+                // Вибираємо перші 3 незакінчені файли
+                var topThree = videoFiles.Where(f => !f.BitField.AllTrue).Take(3).ToList();
 
-                    await manager.SetFilePriorityAsync(next, Priority.High);
-                    LogAction?.Invoke($"🔥 Тепер з пріоритетом: {next.Path}");
-                }
+                // Спочатку ставимо Low для всіх відеофайлів
+                foreach (var f in videoFiles)
+                    await manager.SetFilePriorityAsync(f, Priority.Low);
+
+                // Піднімаємо High тільки для перших трьох
+                foreach (var f in topThree)
+                    await manager.SetFilePriorityAsync(f, Priority.High);
 
                 foreach (var file in videoFiles)
                 {
@@ -114,12 +130,15 @@ namespace WatchedAnimeList.Helpers
                 await Task.Delay(1000);
             }
 
+
             LogAction?.Invoke(completeLog.ToString());
             LogAction?.Invoke("🏁 Усі вибрані відеофайли завантажено.");
             OnDownloadFinished?.Invoke();
             downloadFinished = true;
 
-            MainWindow.Global.mainPage?.DownloadedTitlesUpdate();
+            if (saveFolder is null)
+                Debug.Ex("saveFolder is null");
+
             TorrentDownloader.RemoveManager(saveFolder);
         }
 
@@ -131,26 +150,69 @@ namespace WatchedAnimeList.Helpers
                 OnEpisodeCountUpdated?.Invoke();
             }
         }
+
+        private readonly Dictionary<string, long> lastDownloaded = new();
+        private readonly Dictionary<string, double> fileSpeed = new();
+        double alpha = 0.2;
         private void LogStatus()
         {
             var log = new StringBuilder();
-
-            double totalSpeed = manager.Monitor.DownloadSpeed / 1024.0;
-            log.AppendLine($"⬇️ Загальна швидкість: {totalSpeed:F2} KB/s");
             log.AppendLine("📂 Статус файлів:");
 
-            foreach (var file in manager.Files.Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4")))
+            double totalSpeed = 0;
+            int totalPeers = 0;
+
+            if (manager is null)
+                Debug.Ex("manager is null");
+
+            foreach (var file in manager.Files
+                .Where(f => f.Path.EndsWith(".mkv") || f.Path.EndsWith(".mp4"))
+                .OrderBy(f => ExtractEpisodeNumber(f.Path)))
             {
+                int ep = ExtractEpisodeNumber(file.Path);
                 long size = file.Length;
                 long downloaded = file.BytesDownloaded();
                 double progress = size > 0 ? (downloaded / (double)size) * 100.0 : 0;
                 double mbDownloaded = downloaded / (1024.0 * 1024.0);
                 double mbSize = size / (1024.0 * 1024.0);
-                string priority = file.Priority.ToString();
 
-                log.AppendLine($"\u2014 {Path.GetFileName(file.Path)}: {mbDownloaded:F2} / {mbSize:F2} MB | {progress:F1}% | prioryty: {priority}");
+                string status;
+                double speed = 0;
+                int peers = manager.Peers.Available + manager.Peers.Seeds;
+                totalPeers += peers;
+
+                if (file.BitField.AllTrue)
+                {
+                    status = "✔ завершено";
+                }
+                else if (file.Priority == Priority.DoNotDownload)
+                {
+                    status = "❌ не качається";
+                }
+                else
+                {
+                    status = file.Priority == Priority.High ? "⬇️ нормальний" : "в черзі";
+
+                    if (!lastDownloaded.ContainsKey(file.Path))
+                        lastDownloaded[file.Path] = downloaded;
+
+                    long delta = downloaded - lastDownloaded[file.Path];
+                    lastDownloaded[file.Path] = downloaded;
+
+                    double newSpeed = delta / 1024.0; // KB/s за останню секунду
+                    if (!fileSpeed.ContainsKey(file.Path))
+                        fileSpeed[file.Path] = newSpeed;
+                    else
+                        fileSpeed[file.Path] = alpha * newSpeed + (1 - alpha) * fileSpeed[file.Path];
+
+                    speed = fileSpeed[file.Path];
+                    totalSpeed += speed;
+                }
+
+                log.AppendLine($"Ep {ep}: {mbDownloaded:F2}/{mbSize:F2} MB | {progress:F1}% | Peers: {peers} | {status} {(speed > 0 ? $"⬇️ {speed:F2} KB/s" : "")}");
             }
 
+            log.Insert(0, $"🌐 Піри всіх файлів: {totalPeers} | Швидкість всіх файлів: {totalSpeed:F2} KB/s\n");
             LogAction?.Invoke(log.ToString());
         }
 
@@ -173,7 +235,8 @@ namespace WatchedAnimeList.Helpers
                 (manager.State == TorrentState.Downloading || manager.State == TorrentState.Seeding))
             {
                 await manager.StopAsync();
-                LogAction?.Invoke($"⏹ Зупинено торрент: {manager.Torrent.Name}");
+                if(manager.Torrent != null)
+                    LogAction?.Invoke($"⏹ Зупинено торрент: {manager.Torrent.Name}");
             }
         }
 

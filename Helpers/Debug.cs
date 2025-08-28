@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Windows;
+using WatchedAnimeList.Controls;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -97,42 +98,6 @@ namespace WatchedAnimeList.Helpers
         }
 
         /// <summary>
-        /// Logs the message and throws a standard Exception.
-        /// </summary>
-        /// <param name="message">The message to log and include in the exception.</param>
-        /// <param name="type">The notification type.</param>
-        /// <param name="file">Compiler filled file path.</param>
-        /// <param name="line">Compiler filled line number.</param>
-        /// <param name="member">Compiler filled member name.</param>
-        public static void LogAndThrow(string message, NotificationType type = NotificationType.Error,
-            [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0,
-            [CallerMemberName] string member = "")
-        {
-            Log(message, type, file, line, member);
-            throw new Exception(message); // або свій Exception тип
-        }
-
-        /// <summary>
-        /// Logs the message and throws a custom exception type.
-        /// </summary>
-        /// <typeparam name="TException">The type of exception to throw.</typeparam>
-        /// <param name="message">The message to log and include in the exception.</param>
-        /// <param name="type">The notification type.</param>
-        /// <param name="file">Compiler filled file path.</param>
-        /// <param name="line">Compiler filled line number.</param>
-        /// <param name="member">Compiler filled member name.</param>
-        public static void LogAndThrow<TException>(string message, NotificationType type = NotificationType.Error,
-            [CallerFilePath] string file = "",
-            [CallerLineNumber] int line = 0,
-            [CallerMemberName] string member = "") where TException : Exception
-        {
-            Log(message, type, file, line, member);
-            var ex = (TException)Activator.CreateInstance(typeof(TException), message)!;
-            throw ex;
-        }
-
-        /// <summary>
         /// Logs a message and immediately throws an Exception with that message.
         /// </summary>
         /// <param name="message">The message to log and include in the exception.</param>
@@ -147,7 +112,12 @@ namespace WatchedAnimeList.Helpers
             [CallerMemberName] string member = "")
         {
             Log(message, type, file, line, member);
-            throw new Exception(message);
+            throw new DebugException(message);
         }
+    }
+
+    public class DebugException : Exception
+    {
+        public DebugException(string msg) : base(msg) { }
     }
 }

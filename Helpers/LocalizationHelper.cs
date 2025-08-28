@@ -6,7 +6,7 @@ namespace WatchedAnimeList.Helpers
 {
     public static class LocalizationHelper
     {
-        private static string curLanguage = "en";
+        private static string curLanguage = "EN-GB";
         private static string[] Languages = Array.Empty<string>();
         private static readonly Dictionary<string, Dictionary<string, string>> Translations = new();
         public static event EventHandler? OnLanguageChanged;
@@ -17,7 +17,10 @@ namespace WatchedAnimeList.Helpers
             var localisationsDirectory = Path.Combine(baseDirectory, "Languages");
 
             var languagesFilesName = Directory.GetFiles(localisationsDirectory);
-            if (languagesFilesName.Length == 0) Debug.Log("Не знайдено жодного файлу мови", NotificationType.Error);
+            if (languagesFilesName.Length == 0) 
+                Debug.Ex("Не знайдено жодного файлу мови", NotificationType.Error);
+
+            curLanguage = Path.GetFileNameWithoutExtension(Path.Combine(localisationsDirectory, languagesFilesName[0]));
             Languages = new string[languagesFilesName.Length];
             int i = 0;
 
@@ -73,7 +76,7 @@ namespace WatchedAnimeList.Helpers
             var client = new Translator("49d710dd-2897-4129-b171-2ea0548043c8:fx");
             var translatedText = await client.TranslateTextAsync(
                 textToTranslate,
-                LanguageCode.EnglishAmerican,
+                LanguageCode.English,
                 targetLang);
             return translatedText.ToString();
         }

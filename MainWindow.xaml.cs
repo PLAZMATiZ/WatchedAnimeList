@@ -23,12 +23,22 @@ namespace WatchedAnimeList
             MainPage();
         }
 
-        public void MainPage()
+        public void MainPage(bool disposePrevious = true)
         {
+            if (disposePrevious && MainContent.Content is IDisposable disposable)
+            {
+                disposable.Dispose();
+                MainContent.Content = null;
+            }
             MainContent.Content = mainPage;
         }
-        public void GoToPage(UserControl page)
+        public void GoToPage(UserControl page, bool disposePrevious = true)
         {
+            if (disposePrevious && MainContent.Content is IDisposable disposable)
+            {
+                disposable.Dispose();
+                MainContent.Content = null;
+            }
             MainContent.Content = page;
         }
         #region UI Elements
@@ -84,7 +94,6 @@ namespace WatchedAnimeList
 
                 WatchAnimePage page = new(torrentFile);
                 MainContent.Content = page;
-                
             }
         }
 

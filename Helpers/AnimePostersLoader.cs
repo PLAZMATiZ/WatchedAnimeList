@@ -13,6 +13,7 @@ using WatchedAnimeList.ViewModels;
 using Newtonsoft.Json.Linq;
 using System.Net.Http;
 using System.Security.Policy;
+using Windows.Media.Protection.PlayReady;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -30,13 +31,13 @@ namespace WatchedAnimeList.Helpers
             // 1️⃣ Локальний кеш
             foreach (var anime in collection.Values)
             {
-                if (string.IsNullOrEmpty(anime.AnimeNameEN))
+                if (string.IsNullOrEmpty(anime.OriginalName))
                 {
                     failed.Add("Unknown");
                     continue;
                 }
 
-                var safeFileName = GetSafeImageFileName(anime.AnimeNameEN);
+                var safeFileName = GetSafeImageFileName(anime.OriginalName);
                 var imagePath = Path.Combine(folderPath, safeFileName);
 
                 if (File.Exists(imagePath))
@@ -54,12 +55,12 @@ namespace WatchedAnimeList.Helpers
                     }
                     catch
                     {
-                        failed.Add(anime.AnimeNameEN);
+                        failed.Add(anime.OriginalName);
                     }
                 }
                 else
                 {
-                    failed.Add(anime.AnimeNameEN);
+                    failed.Add(anime.OriginalName);
                 }
             }
 
@@ -151,12 +152,12 @@ namespace WatchedAnimeList.Helpers
             var httpClient = new HttpClient();
             Directory.CreateDirectory(folderPath);
 
-            foreach (var vm in targetCollection.Where(x => x.AnimeNameEN == null))
+            foreach (var vm in targetCollection.Where(x => x.OriginalName == null))
             {
-                Console.WriteLine($"[WARN] Null AnimeNameEN у {vm}");
+                Console.WriteLine($"[WARN] Null OriginalName у {vm}");
             }
             var toDownload = targetCollection
-                .Where(vm => vm.AnimeNameEN != null && failed.Contains(vm.AnimeNameEN))
+                .Where(vm => vm.OriginalName != null && failed.Contains(vm.OriginalName))
                 .ToList();
 
             failed.Clear();
@@ -166,10 +167,10 @@ namespace WatchedAnimeList.Helpers
 
             foreach (var vm in toDownload)
             {
-                if (vm.AnimeNameEN is null)
-                    Debug.Ex("vm.AnimeNameEN is null");
+                if (vm.OriginalName is null)
+                    Debug.Ex("vm.OriginalName is null");
 
-                var encodedName = Uri.EscapeDataString(vm.AnimeNameEN);
+                var encodedName = Uri.EscapeDataString(vm.OriginalName);
                 var url = $"https://api.jikan.moe/v4/anime?q={encodedName}&limit=1";
 
                 try
@@ -179,16 +180,16 @@ namespace WatchedAnimeList.Helpers
 
                     if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
                     {
-                        Debug.Log($"[RATE LIMIT] {vm.AnimeNameEN} | Increasing delay to {delayMs + 1000}ms");
+                        Debug.Log($"[RATE LIMIT] {vm.OriginalName} | Increasing delay to {delayMs + 1000}ms");
                         delayMs = Math.Min(delayMs + 1000, maxDelay);
-                        failed.Add(vm.AnimeNameEN);
+                        failed.Add(vm.OriginalName);
                         continue;
                     }
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        Debug.Log($"[FAIL] {vm.AnimeNameEN} | Status: {response.StatusCode} | URL: {url}");
-                        failed.Add(vm.AnimeNameEN);
+                        Debug.Log($"[FAIL] {vm.OriginalName} | Status: {response.StatusCode} | URL: {url}");
+                        failed.Add(vm.OriginalName);
                         continue;
                     }
 
@@ -198,13 +199,13 @@ namespace WatchedAnimeList.Helpers
 
                     if (string.IsNullOrEmpty(imageUrl))
                     {
-                        Debug.Log($"[NO IMAGE] {vm.AnimeNameEN} | URL: {url}");
-                        failed.Add(vm.AnimeNameEN);
+                        Debug.Log($"[NO IMAGE] {vm.OriginalName} | URL: {url}");
+                        failed.Add(vm.OriginalName);
                         continue;
                     }
 
                     var imageData = await httpClient.GetByteArrayAsync(imageUrl);
-                    var safeFileName = GetSafeImageFileName(vm.AnimeNameEN);
+                    var safeFileName = GetSafeImageFileName(vm.OriginalName);
                     var imagePath = Path.Combine(folderPath, safeFileName);
                     await File.WriteAllBytesAsync(imagePath, imageData);
 
@@ -226,12 +227,35 @@ namespace WatchedAnimeList.Helpers
                 }
                 catch (Exception ex)
                 {
-                    Debug.Log($"[EXCEPTION] {vm.AnimeNameEN} | {ex.Message} | URL: {url}");
-                    failed.Add(vm.AnimeNameEN);
+                    Debug.Log($"[EXCEPTION] {vm.OriginalName} | {ex.Message} | URL: {url}");
+                    failed.Add(vm.OriginalName);
                 }
             }
 
             return failed;
+        }
+        public static async Task<BitmapImage?> DownloadImageAsync(string url)
+        {
+            var httpClient = new HttpClient();
+
+            try
+            {
+                var bytes = await httpClient.GetByteArrayAsync(url);
+                using var ms = new MemoryStream(bytes);
+
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.StreamSource = ms;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                Debug.Log($"Помилка при завантаженні: {ex.Message}", NotificationType.Warning);
+                return null;
+            }
         }
 
         public static string GetSafeImageFileName(string animeTitle)

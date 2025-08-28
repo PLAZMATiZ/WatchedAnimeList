@@ -34,7 +34,7 @@
                             </PathGeometry>
                         </Grid.Clip>
                     </Grid>
-                    <TextBlock x:Name="AnimeCardName" Text="{Binding AnimeNameEN}" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Foreground="#e5e5e5" FontFamily="Segoe Print" FontSize="18" TextAlignment="Center" />
+                    <TextBlock x:Name="AnimeCardName" Text="{Binding OriginalName}" Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" Foreground="#e5e5e5" FontFamily="Segoe Print" FontSize="18" TextAlignment="Center" />
                 </Grid>
             </Border>
         </Button>

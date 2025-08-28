@@ -10,6 +10,10 @@
   "AnimeWatchDateHint_Text": "Review date",
   "AnimGenresHint_Text": "Genres",
   "AnimeWatchedEpisodesHint_Text": "Watched episodes",
+  "Sync_Button_Text": "Sync",
+  "Sync_Button_ToolTip_Text": "Load all anime data if Original name is not empty",
+  "Save_Button_Text": "Save",
+  "Save_Button_ToolTip_Text": "Add anime to watched",
   "": ""
 
 }

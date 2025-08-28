@@ -5,7 +5,6 @@
              xmlns:local="clr-namespace:WatchedAnimeList"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
-
         <Style TargetType="Button" x:Key="NoFocusButton">
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="Template">

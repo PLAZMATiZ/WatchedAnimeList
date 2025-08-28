@@ -4,20 +4,14 @@ using HtmlDocument = HtmlAgilityPack.HtmlDocument;
 
 namespace WatchedAnimeList.Helpers
 {
-    public class SiteParser()
+    public static class SiteParser
     {
-        public static SiteParser Global;
-
-        public void Initialize()
+        public static bool UrlValidate(string url)
         {
-            Global = this;
-        }
-        public bool UrlValidate(string url)
-        {
-            bool isValid = Uri.TryCreate(url, UriKind.Absolute, out Uri uri);
+            bool isValid = Uri.TryCreate(url, UriKind.Absolute, out Uri? uri);
             return isValid;
         }
-        public async Task SiteParse(string url, Action<string, string> callback)
+        public static async Task SiteParse(string url, Action<string, string> callback)
         {
             string title = "";
             string date = "";
@@ -25,7 +19,7 @@ namespace WatchedAnimeList.Helpers
             var source = GetAnimeSource(url);
             if (source == null)
                 return;
-            GetSourceContainers(source, out string[] nameContainers, out string[] dateContainers);
+            GetSourceContainers(source, out string[]? nameContainers, out string[]? dateContainers);
             if (nameContainers == null || dateContainers == null)
                 return;
 
@@ -41,9 +35,9 @@ namespace WatchedAnimeList.Helpers
             callback(title, date);
         }
 
-        private string GetAnimeSource(string url)
+        private static string? GetAnimeSource(string url)
         {
-            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri))
                 return null;
 
             string host = uri.Host.ToLowerInvariant();
@@ -61,7 +55,7 @@ namespace WatchedAnimeList.Helpers
 
             return null;
         }
-        private void GetSourceContainers(string source, out string[] name, out string[] reliaseDate)
+        private static void GetSourceContainers(string source, out string[]? name, out string[]? reliaseDate)
         {
             switch (source)
             {
@@ -94,7 +88,7 @@ namespace WatchedAnimeList.Helpers
                 break;
             }
         }
-        private async Task<(string Title, string Date)> ParseAnimeInfoAsync(string url, string[] NameContainers, string[] DateContainers)
+        private static async Task<(string Title, string Date)> ParseAnimeInfoAsync(string url, string[] NameContainers, string[] DateContainers)
         {
             url = url.Trim();
             var http = new HttpClient();

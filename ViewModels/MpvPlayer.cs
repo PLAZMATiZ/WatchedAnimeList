@@ -12,7 +12,6 @@ namespace WatchedAnimeList.ViewModels
     public class MpvPlayer : Control, IDisposable
     {
         private IntPtr mpvHandle;
-        private IntPtr renderHandle;
         private IntPtr hwnd;
 
         [DllImport("libmpv-2.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -30,7 +29,7 @@ namespace WatchedAnimeList.ViewModels
         public void ExecuteCommand(string[] args)
         {
             // Переконайся, що останній елемент = null, як вимагає mpv
-            var listWithNull = args.Concat(new string[] { null }).ToArray();
+            var listWithNull = args.Concat(new string[] {  }).ToArray();
             mpv_command(mpvHandle, listWithNull);
         }
 
@@ -84,7 +83,7 @@ namespace WatchedAnimeList.ViewModels
         }
 
 
-        private void MpvPlayer_HandleCreated(object sender, EventArgs e)
+        private void MpvPlayer_HandleCreated(object? sender, EventArgs e)
         {
             mpvHandle = mpv_create();
             if (mpvHandle == IntPtr.Zero)
@@ -133,7 +132,7 @@ namespace WatchedAnimeList.ViewModels
             return GetProperty("duration");
         }
 
-        private void MpvPlayer_HandleDestroyed(object sender, EventArgs e)
+        private void MpvPlayer_HandleDestroyed(object? sender, EventArgs e)
         {
             if (mpvHandle != IntPtr.Zero)
             {
@@ -149,9 +148,8 @@ namespace WatchedAnimeList.ViewModels
 
             var args = new string[]
             {
-        "loadfile",
-        path,
-        null // Обов'язково!
+                "loadfile",
+                path
             };
 
             int status = mpv_command(mpvHandle, args);

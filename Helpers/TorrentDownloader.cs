@@ -13,7 +13,12 @@ namespace WatchedAnimeList.Helpers
         private static ClientEngine engine = new(
             new EngineSettingsBuilder
             {
-                CacheDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache")
+                CacheDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "cache"),
+                MaximumConnections = 5000,
+                AllowPortForwarding = true,
+                AutoSaveLoadDhtCache = true,
+                MaximumDownloadRate = 0,
+                MaximumUploadRate = 0,
             }.ToSettings()
         );
 
@@ -78,6 +83,9 @@ namespace WatchedAnimeList.Helpers
                 logAction?.Invoke($"❌ Нема активного завантаження для: {saveFolder}");
                 return;
             }
+            if (job.manager is null || job.manager.Torrent is null)
+                Debug.Ex("job.manager.Torrent is null");
+
             Debug.Log($"Відновлення підключення до завантаження: {job.manager.Torrent.Name}", NotificationType.Info);
             logAction?.Invoke($"🔄 Відновлення підключення до завантаження: {job.manager.Torrent.Name}");
 

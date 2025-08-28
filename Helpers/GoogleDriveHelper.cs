@@ -15,7 +15,7 @@ namespace WatchedAnimeList.Helpers
 {
     public class GoogleDriveHelper
     {
-        private DriveService service;
+        private DriveService? service;
         private const string AppName = "WachedAnimeList";
         private const string FolderName = "MyJsonFolder"; // назва папки на Google Drive
 
@@ -52,11 +52,17 @@ namespace WatchedAnimeList.Helpers
             if (resourceName == null)
                 throw new Exception("Вбудований ресурс credentials.json не знайдено");
 
-            return assembly.GetManifestResourceStream(resourceName);
+            Stream? stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream is null)
+                Debug.Ex("stream is null");
+            return stream;
         }
 
         private async Task<string> CreateOrGetFolderIdAsync(string folderName)
         {
+            if (service is null)
+                Debug.Ex("service is null");
+
             var listRequest = service.Files.List();
             listRequest.Q = $"mimeType='application/vnd.google-apps.folder' and name='{folderName}' and trashed=false";
             listRequest.Fields = "files(id, name)";
@@ -83,6 +89,9 @@ namespace WatchedAnimeList.Helpers
 
         public async Task UploadJsonAsync(string jsonText, string fileName)
         {
+            if (service is null)
+                Debug.Ex("service is null");
+
             string folderId = await CreateOrGetFolderIdAsync("Wat  chedAnimeList");
 
             // перевіряємо, чи такий файл вже є
@@ -112,10 +121,13 @@ namespace WatchedAnimeList.Helpers
                 await createRequest.UploadAsync();
             }
         }
-        public async Task<string> DownloadJsonAsync(string fileNameOnDrive)
+        public async Task<string?> DownloadJsonAsync(string fileNameOnDrive)
         {
             try
             {
+                if (service is null)
+                    Debug.Ex("service is null");
+
                 string folderId = await CreateOrGetFolderIdAsync("WachedAnimeList");
 
                 var listRequest = service.Files.List();

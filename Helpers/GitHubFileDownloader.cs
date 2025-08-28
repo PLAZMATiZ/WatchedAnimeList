@@ -25,8 +25,13 @@ namespace WatchedAnimeList.Helpers
                 var assets = doc.RootElement.GetProperty("assets");
                 foreach (var asset in assets.EnumerateArray())
                 {
-                    string name = asset.GetProperty("name").GetString();
-                    string downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                    string? name = asset.GetProperty("name").GetString();
+                    if (name is null)
+                        Debug.Ex("name is null");
+
+                    string? downloadUrl = asset.GetProperty("browser_download_url").GetString();
+                    if (downloadUrl is null)
+                        Debug.Ex("downloadUrl is null");
 
                     if (name.Equals(fileNameToDownload, StringComparison.OrdinalIgnoreCase))
                     {

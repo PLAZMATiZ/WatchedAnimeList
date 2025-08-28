@@ -4,14 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:WatchedAnimeList.Controls"
+             xmlns:helpers="clr-namespace:WatchedAnimeList.Helpers"
              xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
              mc:Ignorable="d" 
              d:DesignHeight="1080" d:DesignWidth="1920">
-    
-    <UserControl.Resources>
-        <local:FileNameConverter x:Key="FileNameConverter" />
-    </UserControl.Resources>
-    
+
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  x:Name="ContentGrid">
             <Grid.RowDefinitions>
@@ -24,9 +21,10 @@
 
                     <ColumnDefinition Width="5"/>
                     <ColumnDefinition Width="60"/>
-                    <ColumnDefinition/>
+                    <ColumnDefinition Width="0.5*"/>
                     <ColumnDefinition Width="3*"/>
                     <ColumnDefinition/>
+                    <ColumnDefinition Width="60"/>
                     <ColumnDefinition Width="60"/>
                     <ColumnDefinition Width="5"/>
 
@@ -64,21 +62,31 @@
                     </Grid>
                 </Border>
 
-                <Border Grid.Column="4" BorderBrush="#34363a" BorderThickness="1" Background="#1e1e1e" HorizontalAlignment="Center" VerticalAlignment="Center" Width="200" Height="50" Margin="0,0,0,0" CornerRadius="10">
+                <Border Grid.Column="4" BorderBrush="#34363a" BorderThickness="1" Background="#1e1e1e" HorizontalAlignment="Center" VerticalAlignment="Center" Width="240" Height="50" Margin="0,0,0,0" CornerRadius="10">
                     <Button Style="{StaticResource StyledButton}" Name="AddAnimeButton" Click="AddAnimeButton_Click" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand" FontFamily="Segoe Print" FontSize="16">
-                        <Label Content="Додати з буферу" Foreground="#fafafa" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                        <Label Content="Додати переглянуте" Foreground="#fafafa" FontSize="18" VerticalAlignment="Center" HorizontalAlignment="Center"/>
                     </Button>
                 </Border>
-                <Border Grid.Column="5" BorderBrush="#34363a" BorderThickness="1" Background="#1e1e1e" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50" Margin="0,0,0,0" CornerRadius="10">
+                <Border Grid.Column="6" BorderBrush="#34363a" BorderThickness="1" Background="#1e1e1e" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50" Margin="0,0,0,0" CornerRadius="10">
                     <Button Name="MenuMoreButton" Click="MenuMoreButton_Click" Style="{StaticResource StyledButton}" Background="Transparent" BorderThickness="0" Padding="0" Cursor="Hand">
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0" >
                             <Rectangle Width="30" Height="4" Fill="White" Margin="3"/>
                             <Rectangle Width="30" Height="4" Fill="White" Margin="3"/>
                             <Rectangle Width="30" Height="4" Fill="White" Margin="3"/>
-
                         </StackPanel>
                     </Button>
                 </Border>
+                <Border Grid.Column="5" BorderBrush="#34363a" BorderThickness="1" Background="#1e1e1e" Width="50" Height="50" CornerRadius="10">
+                </Border>
+
+                <Button Name="Notifications_Button" Grid.Column="5" Click="Notifications_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50" BorderThickness="0" Padding="0" Cursor="Hand">
+                    <Grid Width="50" Height="50">
+                        <Image Source="pack://application:,,,/Assets/notifications.png" Margin="10"/>
+                        <DockPanel VerticalAlignment="Bottom" Height="20" >
+                            <TextBlock x:Name="Notifications_Counter" Text="" FlowDirection="RightToLeft" Margin="3,0,3,0" FontWeight="Bold" FontSize="16" Foreground="#FF930000"/>
+                        </DockPanel>
+                    </Grid>
+                </Button>
             </Grid>
 
             <Grid Name="ContentPanel" Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="#1e1e1e">
@@ -121,205 +129,10 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Grid>
-            <!-- Інфо-панель для підтвердження -->
-            <Grid Grid.Row="2" x:Name="AnimeCardInfoPanel" Background="Transparent" Visibility="Collapsed" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="1*"/>
-                    <ColumnDefinition Width="2*"/>
-                    <ColumnDefinition Width="1*"/>
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="1*"/>
-                    <RowDefinition Height="3*"/>
-                    <RowDefinition Height="1*"/>
-                </Grid.RowDefinitions>
-
-                <Border Grid.Column="1" Grid.Row="1" BorderBrush="#34363a" BorderThickness="1" Background="#181818" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"  CornerRadius="30">
-                </Border>
-                <Grid Grid.Column="1" Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="4*"/>
-                        <RowDefinition Height="1*"/>
-                    </Grid.RowDefinitions>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="300"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="60" Margin="0,20,20,0">
-                            <TextBox x:Name="AnimeCardInfoName" Background="Transparent" Text="Jacas huinja v nazvi" FontFamily="Segoe Print" FontSize="26" Foreground="#e5e5e5" MaxLines="1" HorizontalAlignment="Center" BorderThickness="0"/>
-                        </Grid>
-                    </Grid>
-                    <Grid Grid.Row="0" Grid.Column="0" Width="240" Height="360" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="30,30,0,0">
-                        <Image x:Name="AnimeCardInfoImage"  Source="pack://application:,,,/Assets/defaultAnimeIcon.jpg" Stretch="UniformToFill" Width="240" Height="360" />
-                        <Grid.Clip>
-                            <PathGeometry>
-                                <PathFigure StartPoint="0,10" IsClosed="True">
-                                    <!-- Ліва верхня дуга -->
-                                    <ArcSegment Point="10,0" Size="10,10" SweepDirection="Clockwise"/>
-
-                                    <!-- Верхня лінія до правого верху -->
-                                    <LineSegment Point="230,0"/>
-                                    <!-- Права верхня дуга -->
-                                    <ArcSegment Point="240,10" Size="10,10" SweepDirection="Clockwise"/>
-
-                                    <!-- Права лінія донизу -->
-                                    <LineSegment Point="240,350"/>
-                                    <!-- Права нижня дуга -->
-                                    <ArcSegment Point="230,360" Size="10,10" SweepDirection="Clockwise"/>
-
-                                    <!-- Нижня лінія вліво -->
-                                    <LineSegment Point="10,360"/>
-                                    <!-- Ліва нижня дуга -->
-                                    <ArcSegment Point="0,350" Size="10,10" SweepDirection="Clockwise"/>
-
-                                    <!-- Вгору до початку -->
-                                    <LineSegment Point="0,10"/>
-                                </PathFigure>
-                            </PathGeometry>
-                        </Grid.Clip>
-                    </Grid>
-                    <Grid Grid.Row="1" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="1*"/>
-                            <ColumnDefinition Width="1*"/>
-                        </Grid.ColumnDefinitions>
-                        <Button Click="AcceptButton_Click" Grid.Column="0" Background="Transparent" Style="{StaticResource StyledButton}">
-                            <Border BorderBrush="#34363a" BorderThickness="1" Background="#FF00280B" HorizontalAlignment="Center" VerticalAlignment="Center" Width="240" Height="80" Margin="0,0,0,0" CornerRadius="10">
-                                <Label Content="Воно" Foreground="#fafafa" FontSize="18" FontFamily="Segoe Print" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="0"/>
-                            </Border>
-                        </Button>
-                        <Button Click="RejectButton_Click" Grid.Column="1" Background="Transparent" Style="{StaticResource StyledButton}">
-                            <Border BorderBrush="#34363a" BorderThickness="1" Background="#FF280000" HorizontalAlignment="Center" VerticalAlignment="Center" Width="240" Height="80" Margin="0,0,0,0" CornerRadius="10">
-                                <Label Content="Не воно" Background="Transparent" Foreground="#fafafa" FontSize="18" FontFamily="Segoe Print" VerticalAlignment="Center" HorizontalAlignment="Center" BorderThickness="0"/>
-                            </Border>
-                        </Button>
-                    </Grid>
-                </Grid>
-            </Grid>
+        
         </Grid>
-        <Grid x:Name="MoreOptionsMenuPanel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Visibility="Collapsed">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-            </Grid.ColumnDefinitions>
-            <Button Click="MoreOptionsMenuExit_Clik" Style="{StaticResource NoFocusButton}" Background="Transparent" Grid.ColumnSpan="2" BorderThickness="0"/>
-
-            <Grid x:Name="AnimeDownloads" Grid.Column="1" Margin="10,0,10,0" Visibility="Collapsed">
-                <Border Background="#141414" BorderThickness="2" BorderBrush="Black" CornerRadius="20" 
-                        Margin="0,20,0,6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="20"/>
-
-                <Grid Grid.Row="1" Margin="0,20,0,20">
-                    <TextBlock x:Name="DownloadedAnimeTitlesText" Text="NO Titles Downloaded..." Background="Transparent"
-                               FontFamily="Segoe Print" Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" 
-                               TextTrimming="CharacterEllipsis" TextWrapping="Wrap" Margin="16" Visibility="Visible"/>
-                    
-                    <ListBox x:Name="DownloadedAnimeTitlesList"
-                             Margin="10,10,10,10"
-                             Focusable="False"
-                             ScrollViewer.CanContentScroll="True"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             VirtualizingPanel.IsVirtualizing="True"
-                             VirtualizingPanel.VirtualizationMode="Recycling"
-                             Background="Transparent"
-                             BorderThickness="0" HorizontalContentAlignment="Center">
-                        <ListBox.ItemContainerStyle>
-                            <Style TargetType="ListBoxItem">
-                                <Setter Property="Focusable" Value="False"/>
-                                <Setter Property="BorderThickness" Value="0"/>
-                                <Setter Property="Background" Value="Transparent"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="ListBoxItem">
-                                            <ContentPresenter />
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </ListBox.ItemContainerStyle>
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Grid>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Click="OpenTitle_Click" Tag="{Binding}" Style="{StaticResource NoFocusButton}" 
-                                        HorizontalAlignment="Stretch" Foreground="#e4e4e4" Background="Transparent" BorderThickness="0">
-                                        <Border Background="#4e4e4e" CornerRadius="8" HorizontalAlignment="Stretch">
-                                            <TextBlock Text="{Binding Converter={StaticResource FileNameConverter}}" Background="Transparent"
-                                               FontFamily="Segoe Print" Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" TextWrapping="Wrap"/>
-                                        </Border>
-                                        </Button>
-                                        <Button Grid.Column="1" Click="DeleteTitle_Click" Tag="{Binding}" Style="{StaticResource NoFocusButton}" Margin="6,0,0,0"
-                                                Width="48" Height="48"  Background="Transparent" Foreground="White" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                            <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-                                                <Border Background="#4e4e4e" CornerRadius="10" Width="48" Height="48">
-
-                                                </Border>
-                                                <Border Grid.Column="2" Background="Red" HorizontalAlignment="Center" VerticalAlignment="Center" Width="48" Height="6" 
-                                                        Margin="0,12,0,10" 
-                                                        CornerRadius="2"
-                                                        RenderTransformOrigin="0.5,0.5">
-
-                                                    <Border.RenderTransform>
-                                                        <RotateTransform Angle="45"/>
-                                                    </Border.RenderTransform>
-                                                </Border>
-
-                                                <Border Grid.Column="2" Background="Red" HorizontalAlignment="Center" VerticalAlignment="Center" Width="48" Height="6" 
-                                                        Margin="0,12,0,10" 
-                                                        CornerRadius="2"
-                                                        RenderTransformOrigin="0.5,0.5">
-
-                                                    <Border.RenderTransform>
-                                                        <RotateTransform Angle="-45"/>
-                                                    </Border.RenderTransform>
-                                                </Border>
-                                            </Grid>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </Grid>
-
-            <Grid Grid.Column="2" Margin="10,0,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-                <Border Background="#141414" BorderThickness="2" BorderBrush="Black" CornerRadius="20,0,0,20" 
-                        Margin="0,20,0,6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="20"/>
-
-                <Grid Grid.Row="1">
-                    <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
-                        <Button Click="DownloadHistory_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
-                            <TextBlock Text="Download history" Background="Transparent" FontFamily="Segoe Print" 
-                                       Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                    </Border>
-                </Grid>
-                <Grid Grid.Row="2">
-                    <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
-                        <Button Click="UpdateApp_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
-                            <TextBlock Text="Update App" Background="Transparent" FontFamily="Segoe Print" 
-                                       Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
-                    </Border>
-                </Grid>
-            </Grid>
+        <Grid x:Name="RightPopupMenus" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <ContentControl x:Name="RightPopupContent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </Grid>
     </Grid>
 </UserControl>

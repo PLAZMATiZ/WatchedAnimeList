@@ -11,7 +11,7 @@ public class AnimeItemViewModel : INotifyPropertyChanged
     public WachedAnimeData Model { get; }
 
     public string? AnimeName => Model.AnimeName;
-    public string? AnimeNameEN => Model.AnimeNameEN;
+    public string? OriginalName => Model.OriginalName;
     public string? Genres => Model.Genres;
 
     public BitmapImage? AnimeImage
@@ -32,10 +32,10 @@ public class AnimeItemViewModel : INotifyPropertyChanged
     public AnimeItemViewModel(WachedAnimeData model, Action<string>? onClick = null)
     {
         Model = model;
-        if (AnimeNameEN is null)
+        if (OriginalName is null)
             Debug.Ex("AnimeNameEN is null");
 
-        CardClickCommand = new RelayCommand(_ => onClick?.Invoke(AnimeNameEN));
+        CardClickCommand = new RelayCommand(_ => onClick?.Invoke(OriginalName));
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;

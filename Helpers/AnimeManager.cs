@@ -14,6 +14,11 @@ namespace WatchedAnimeList.Helpers
 {
     public static class AnimeManager
     {
+        private static readonly JsonSerializerOptions jsonSerializerOptions = new()
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
         private static readonly ConcurrentDictionary<string, WachedAnimeData> watchedAnimeDict = new();
         private static string? folderPath;
 
@@ -37,7 +42,7 @@ namespace WatchedAnimeList.Helpers
             if(folderPath is null) 
                 Debug.Ex("folderPath is null");
 
-            if (watchedAnimeDict.Count == 0) return;
+            if (watchedAnimeDict.IsEmpty) return;
 
             string? jsonPath = Path.Combine(folderPath, "anime_data.json");
 
@@ -46,23 +51,17 @@ namespace WatchedAnimeList.Helpers
                 dataCollection = watchedAnimeDict.Values.ToArray()
             };
 
-            var options = new JsonSerializerOptions
-            {
-                WriteIndented = true,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
-            var json = JsonSerializer.Serialize(data, options);
+            var json = JsonSerializer.Serialize(data, jsonSerializerOptions);
             File.WriteAllText(jsonPath, json);
 
             foreach (var item in watchedAnimeDict.Values)
             {
                 if (item is null)
                     Debug.Ex("item is null");
-                if(item.AnimeNameEN is null)
-                    Debug.Ex("item.AnimeNameEN is null");
+                if(item.OriginalName is null)
+                    Debug.Ex("item.OriginalName is null");
 
-                string finalPath = Path.Combine(folderPath, "Anime Icons", GetSafeImageFileName(item.AnimeNameEN));
+                string finalPath = Path.Combine(folderPath, "Anime Icons", GetSafeImageFileName(item.OriginalName));
                 if (item.AnimeImage != null && !File.Exists(finalPath))
                 {
                     SaveBitmapImageToFile(item.AnimeImage, finalPath);
@@ -132,13 +131,13 @@ namespace WatchedAnimeList.Helpers
 
             Parallel.ForEach(collection, new ParallelOptions { MaxDegreeOfParallelism = 4 }, animeData =>
             {
-                if (animeData.AnimeNameEN is null)
-                    Debug.Ex("animeData.AnimeNameEN is null");
+                if (animeData.OriginalName is null)
+                    Debug.Ex("animeData.OriginalName is null");
 
-                if (skipExisting && watchedAnimeDict.ContainsKey(animeData.AnimeNameEN))
+                if (skipExisting && watchedAnimeDict.ContainsKey(animeData.OriginalName))
                     return;
 
-                watchedAnimeDict[animeData.AnimeNameEN] = animeData;
+                watchedAnimeDict[animeData.OriginalName] = animeData;
                 addedItems.Add(animeData);
             });
 
@@ -160,7 +159,7 @@ namespace WatchedAnimeList.Helpers
             try
             {
                 var data = JsonSerializer.Deserialize<WachedAnimeSaveDataCollection>(json);
-                if (data?.dataCollection != null && data.dataCollection.All(x => !string.IsNullOrWhiteSpace(x.AnimeNameEN)))
+                if (data?.dataCollection != null && data.dataCollection.All(x => !string.IsNullOrWhiteSpace(x.OriginalName)))
                 {
                     return data;
                 }
@@ -191,8 +190,8 @@ namespace WatchedAnimeList.Helpers
         
         public static void AddAnime(WachedAnimeData animeData)
         {
-            if (animeData == null || string.IsNullOrEmpty(animeData.AnimeNameEN)) return;
-            watchedAnimeDict[animeData.AnimeNameEN] = animeData;
+            if (animeData == null || string.IsNullOrEmpty(animeData.OriginalName)) return;
+            watchedAnimeDict[animeData.OriginalName] = animeData;
         }
         public static bool RemoveAnimeByName(string name)
         {
@@ -224,15 +223,12 @@ namespace WatchedAnimeList.Helpers
         public static void AddEpisode(string titleName, int episode)
         {
             if (!watchedAnimeDict.TryGetValue(titleName, out var animeData))
-                return;
+                Debug.Ex($"Аніме не існує: {titleName}");
 
             if (animeData.WatchedEpisodesSet == null)
                 animeData.WatchedEpisodesSet = new SortedSet<int>();
 
             animeData.WatchedEpisodesSet.Add(episode);
-
-            // Оновлюємо рядкове представлення для збереження
-            animeData.WatchedEpisodesSet = animeData.WatchedEpisodesSet;
 
             Debug.Log($"Епізод {episode} додано до переглянутих");
             _ = Save();
@@ -243,16 +239,16 @@ namespace WatchedAnimeList.Helpers
         public static WachedAnimeData CreateAnime_Clear()
         {
             var wachedAnimeData = new WachedAnimeData();
-            wachedAnimeData.AnimeImage = new BitmapImage(new Uri("pack://application:,,,/Resources/def_poster.jpg"));
             wachedAnimeData.WatchedDate = DateTime.Now.ToString();
+
+            NotificationsHelper.AddNotification( () => { Debug.Show("lox"); }, "new Message");
 
             return wachedAnimeData;
         }
         public static WachedAnimeData CreateAnime_Name(string name)
         {
             var wachedAnimeData = new WachedAnimeData();
-            wachedAnimeData.AnimeImage = new BitmapImage(new Uri("pack://application:,,,/Resources/def_poster.jpg"));
-            wachedAnimeData.AnimeNameEN = name;
+            wachedAnimeData.OriginalName = name;
             wachedAnimeData.WatchedDate = DateTime.Now.ToString();
 
             return wachedAnimeData;
@@ -292,25 +288,28 @@ namespace WatchedAnimeList.Helpers
             return data;
         }
         
-        public static void OnAnimeCardClicked(string animeNameEN)
+        public static void OnAnimeCardClicked(string OriginalName)
         {
-            var animeData = GetAnimeByName(animeNameEN);
+            var animeData = GetAnimeByName(OriginalName);
             if (animeData is null)
-                Debug.Ex($"animeData is null | {animeNameEN} |");
+                Debug.Ex($"animeData is null | {OriginalName} |");
 
             var page = new AnimeInfo_Page(animeData);
             MainWindow.Global.GoToPage(page);
+        }
+        #endregion
 
-            /*
-            Debug.Show(
-                $"Назва: {animeNameEN} \n" +
-                $"Жанр: {animeData?.Genres ?? "N/A"} \n" +
-                $"Власний рейтинг: {animeData?.Rating ?? 0} \n" +
-                $"Дата перегляду: {animeData?.WatchedDate ?? "N/A"} \n" +
-                $"Переглянуті епізоди: {(animeData?.WatchedEpisodesSet != null && animeData.WatchedEpisodesSet.Any()
-                    ? string.Join(",", animeData.WatchedEpisodesSet) : "N/A")}\n"
-            );
-            */
+        #region Supply metods
+        private static BitmapImage LoadImageFromBytes(byte[] imageData)
+        {
+            using var ms = new MemoryStream(imageData);
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            image.StreamSource = ms;
+            image.EndInit();
+            image.Freeze();
+            return image;
         }
         #endregion
     }

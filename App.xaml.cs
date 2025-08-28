@@ -22,38 +22,50 @@ namespace WatchedAnimeList
         [STAThread]
         public static void Main()
         {
-            try
+            Debug.Log("=== WAL starting via Main() ===");
+
+            
+            AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
-                Debug.Log("=== WAL starting via Main() ===");
+                if (e.ExceptionObject is DebugException) return;
+                Debug.ShowAndLog($"[UnhandledException] {e.ExceptionObject}\n", NotificationType.Error);
+            };
 
-                AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+            TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                var flat = e.Exception.Flatten();
+                if (flat.InnerExceptions.All(x => x is DebugException))
                 {
-                    Debug.ShowAndLog($"[UnhandledException] {e.ExceptionObject}\n", NotificationType.Error);
-                };
-
-                TaskScheduler.UnobservedTaskException += (s, e) =>
-                {
-                    Debug.ShowAndLog($"[Task Exception] {e.Exception}", NotificationType.Error);
                     e.SetObserved();
-                };
+                    return; // всі наші DebugException → ігноруємо
+                }
 
-                var app = new WatchedAnimeList.App();
+                Debug.ShowAndLog($"[Task Exception] {flat}", NotificationType.Error);
+                e.SetObserved();
+            };
 
-                System.Windows.Application.Current.DispatcherUnhandledException += (s, e) =>
-                {
-                    Debug.ShowAndLog($"[UI Exception] {e.Exception}", NotificationType.Error);
-                    e.Handled = true;
-                };
+            var app = new WatchedAnimeList.App();
 
-                app.InitializeComponent();
-                app.Startup += app.Application_Startup;
-                app.Run();
-            }
-            catch (Exception ex)
+            System.Windows.Application.Current.DispatcherUnhandledException += (s, e) =>
             {
-                Debug.Log($"[MAIN try-catch] {ex}", NotificationType.Error);
-            }
+                if (e.Exception is DebugException) { e.Handled = true; return; }
+                Debug.ShowAndLog($"[UI Exception] {e.Exception}", NotificationType.Error);
+                e.Handled = true;
+            };
+
+            app.InitializeComponent();
+            app.Startup += app.Application_Startup;
+            app.Run();
         }
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            GlobalToolTip.Init();
+
+        }
+
         private void Application_Startup(object sender, StartupEventArgs e)
         {
             try
@@ -63,29 +75,41 @@ namespace WatchedAnimeList
                 MainWindow = mainWindow;
                 mainWindow.Show(); // Показуємо вікно
 
-#if !DEBUG
-                if (!AutorunHelper.IsAutorunEnabled("WatchedAnimeList"))
-                {
-                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    if (!File.Exists(exePath))
-                        Debug.Show($"Executable not found: {exePath}");
-                    AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
-                }
-                UpdateUpdater();
-#endif
+                CreateNotifyIcon();
             }
             catch (Exception ex)
             {
                 Debug.Log("App startup crash: " + ex);
             }
-            CreateNotifyIcon();
+
+#if !DEBUG
+                if (!AutorunHelper.IsAutorunEnabled("WatchedAnimeList"))
+                {
+                    string? exePath = Process.GetCurrentProcess().MainModule?.FileName;
+
+                    if (string.IsNullOrEmpty(exePath) || !File.Exists(exePath))
+                    {
+                        Debug.Show($"Executable not found: {exePath}");
+                        return;
+                    }
+                    AutorunHelper.EnableAutorun("WatchedAnimeList", exePath);
+                }
+                _ = UpdateUpdater();
+#endif
         }
 
-        private NotifyIcon _notifyIcon;
+        private NotifyIcon? _notifyIcon;
         private void CreateNotifyIcon()
         {
             var assembly = Assembly.GetExecutingAssembly();
-            using Stream stream = assembly.GetManifestResourceStream("WatchedAnimeList.Assets.Icon.ico");
+
+            using Stream? stream = assembly.GetManifestResourceStream("WatchedAnimeList.Assets.Icon.ico");
+            if (stream == null)
+            {
+                Debug.Log(@"Ресурс не знайдено ""WatchedAnimeList.Assets.Icon.ico""");
+                return;
+            }
+
             // Створюємо трей-іконку
             _notifyIcon = new NotifyIcon
             {
@@ -118,53 +142,64 @@ namespace WatchedAnimeList
 
         private void OnExitClick(object sender, RoutedEventArgs e)
         {
-            WachedAnimeSaveLoad.Global.Save();
+            _ = AnimeManager.Save();
             Current.Shutdown();
         }
 
-        private async void UpdateUpdater()
+        private static async Task UpdateUpdater()
         {
             const string repoApi = "https://api.github.com/repos/PLAZMATiZ/WatchedAnimeList/releases/tags/updater";
             const string fileToDownload = "WAL_Updater.exe";
 
             string localPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, fileToDownload);
 
-            string? latestVersion = await GitHubVersionHelper.GetVersionFromReleaseNameAsync(repoApi);
-            string? localVersion = LocalVersionStorage.GetVersion("Updater");
-            Debug.Log($"Локальна версія {localVersion ?? "null"} остання {latestVersion}...");
-
-            if (!string.IsNullOrEmpty(latestVersion))
+            while (true)
             {
-                if (latestVersion == localVersion)
+                try
                 {
-                    Debug.Log("Updater вже актуальний.");
-                }
-                else
-                {
-                    Debug.Log($"Оновлення Updater");
 
-                    bool success = await GitHubFileDownloader.DownloadFileFromLatestReleaseAsync(
-                        repoApi,
-                        fileToDownload,
-                        localPath
-                    );
+                    string? latestVersion = await GitHubVersionHelper.GetVersionFromReleaseNameAsync(repoApi);
+                    string? localVersion = LocalVersionStorage.GetVersion("Updater");
+                    Debug.Log($"Локальна версія {localVersion ?? "null"} остання {latestVersion}...");
 
-                    if (success)
+                    if (!string.IsNullOrEmpty(latestVersion))
                     {
-                        Debug.Log("Updater успішно завантажено.");
-                        LocalVersionStorage.SetVersion("Updater", latestVersion);
+                        if (latestVersion == localVersion)
+                        {
+                            Debug.Log("Updater вже актуальний.");
+                        }
+                        else
+                        {
+                            Debug.Log($"Оновлення Updater");
+
+                            bool success = await GitHubFileDownloader.DownloadFileFromLatestReleaseAsync(
+                                repoApi,
+                                fileToDownload,
+                                localPath
+                            );
+
+                            if (success)
+                            {
+                                Debug.Log("Updater успішно завантажено.");
+                                LocalVersionStorage.SetVersion("Updater", latestVersion);
+                            }
+                            else
+                            {
+                                Debug.Log("Завантаження Updater не вдалося.");
+                            }
+                        }
                     }
                     else
                     {
-                        Debug.Log("Завантаження Updater не вдалося.");
+                        Debug.Log("Не вдалося визначити версію.");
                     }
+                    break;
+                }
+                catch
+                {
+                    await Task.Delay(5000);
                 }
             }
-            else
-            {
-                Debug.Log("Не вдалося визначити версію.");
-            }
-
             if (!File.Exists(localPath))
             {
                 Debug.Log("Updater не знайдено за шляхом: " + localPath);
@@ -204,6 +239,10 @@ namespace WatchedAnimeList
 
     public static class LocalVersionStorage
     {
+        private static readonly JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true
+        };
         private static readonly string VersionFilePath =
             Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "version.json");
 
@@ -218,10 +257,7 @@ namespace WatchedAnimeList
 
         public static void Save(Dictionary<string, string> versions)
         {
-            var json = JsonSerializer.Serialize(versions, new JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
+            var json = JsonSerializer.Serialize(versions, jsonSerializerOptions);
 
             File.WriteAllText(VersionFilePath, json);
         }
