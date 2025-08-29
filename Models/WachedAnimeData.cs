@@ -24,7 +24,6 @@ namespace WatchedAnimeList.Models
         /// The original (English or Japanese) name of the anime.
         /// </summary>
         [JsonPropertyName("AnimeNameEN")] // so that JSON can read the old field
-        [JsonConverter(typeof(OriginalNameConverter))]
         public string? OriginalName { get; set; }
 
         /// <summary>
@@ -67,20 +66,5 @@ namespace WatchedAnimeList.Models
         /// Array of watched anime data.
         /// </summary>
         public WachedAnimeData[] dataCollection { get; set; } = [];
-    }
-
-    public class OriginalNameConverter : JsonConverter<string?>
-    {
-        public override string? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
-        {
-            // при завантаженні читаємо AnimeNameEN
-            return reader.GetString();
-        }
-
-        public override void Write(Utf8JsonWriter writer, string? value, JsonSerializerOptions options)
-        {
-            // при збереженні пишемо OriginalName
-            writer.WriteStringValue(value);
-        }
     }
 }

@@ -15,6 +15,7 @@ using WatchedAnimeList.ViewModels;
 using Debug = WatchedAnimeList.Helpers.Debug;
 using DeepL;
 using static System.Net.Mime.MediaTypeNames;
+using System.Collections.Specialized;
 
 namespace WatchedAnimeList.Controls
 {
@@ -42,6 +43,12 @@ namespace WatchedAnimeList.Controls
             {
                 Debug.Log(ex.ToString());
             }
+
+            NotificationsHelper.SubToIsCheckedChanged((s, n) =>
+            {
+                NotificationsChange();
+            });
+            NotificationsHelper.SubToNotificationsChange(NotificationsChange);
             LocalizationHelper.OnLanguageChanged += LocalizationChangedHandler;
             LocalizationChangedHandler(null, EventArgs.Empty);
         }
@@ -80,6 +87,23 @@ namespace WatchedAnimeList.Controls
             return null;
         }
         #endregion
+
+        private void NotificationsChange(object? sender, NotifyCollectionChangedEventArgs e) => NotificationsChange();
+
+        private void NotificationsChange()
+        {
+            var notifCount = NotificationsHelper.GetUnreadNotificationCount();
+            if (notifCount == 0)
+            {
+                Notifications_Counter.Text = "";
+            }
+            else if (notifCount > 0)
+            {
+                Notifications_Counter.Text = notifCount.ToString();
+            }
+            else
+                Debug.Ex("notifCount cannot be negative");
+        }
 
         #region Search
 

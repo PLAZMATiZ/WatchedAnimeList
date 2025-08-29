@@ -39,14 +39,14 @@
                                     <Setter Property="Background" Value="AliceBlue"/>
                                     <!-- колір за замовчуванням -->
                                     <Style.Triggers>
-                                        <DataTrigger Binding="{Binding is_Checked}" Value="True">
+                                        <DataTrigger Binding="{Binding IsChecked}" Value="True">
                                             <Setter Property="Background" Value="Gray"/>
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
 
-                            <TextBlock FontSize="16" Text="{Binding Text}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Black"/>
+                            <TextBlock FontSize="16" Text="{Binding MessageText}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="Black"/>
                         </Border>
                         <DataTemplate.Triggers>
                             <!-- ховер -->
@@ -55,7 +55,7 @@
                             </DataTrigger>
 
                             <!-- checked -->
-                            <DataTrigger Binding="{Binding is_Checked}" Value="True">
+                            <DataTrigger Binding="{Binding IsChecked}" Value="True">
                                 <Setter TargetName="BorderElement" Property="Background" Value="Gray"/>
                             </DataTrigger>
                         </DataTemplate.Triggers>

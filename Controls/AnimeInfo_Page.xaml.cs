@@ -73,7 +73,8 @@ namespace WatchedAnimeList.Controls
             }
             else if (!string.IsNullOrEmpty(animeData.OriginalName))
             {
-                AnimeName_Text.Text = await LocalizationHelper.TranslateText(animeData.OriginalName);
+                animeData.AnimeName = await LocalizationHelper.TranslateText(animeData.OriginalName);
+                AnimeName_Text.Text = animeData.AnimeName;
                 OriginalAnimeName_Text.Text = animeData.OriginalName;
             }
             else

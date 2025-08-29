@@ -32,7 +32,7 @@ namespace WatchedAnimeList.Controls
 
         private void NotificationsRefresh()
         {
-            if (NotificationsHelper.Notifications.Count == 0)
+            if (NotificationsHelper.GetNotificationCount() == 0)
                 Notifications_.Text = LocalizationHelper.GetTranslation("N/A_Notifications");
             else
                 Notifications_.Text = "";

@@ -67,7 +67,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Languages\EN-GB.json">
+    <None Update="Languages\en-GB.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="libmpv-2.dll">

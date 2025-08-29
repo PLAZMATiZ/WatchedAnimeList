@@ -14,7 +14,7 @@ namespace WatchedAnimeList.Helpers
             Settings.Initialize();
             AnimeManager.Initialize(folderPath);
             LocalizationHelper.Initialize();
-            NotificationsHelper.Initialize();
+            NotificationsHelper.Initialize(folderPath);
         }
     }
 }

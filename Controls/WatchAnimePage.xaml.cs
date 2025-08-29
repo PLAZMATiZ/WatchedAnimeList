@@ -31,20 +31,12 @@ namespace WatchedAnimeList.Controls
         private string? animeFolderPath;
         private string animeName = "";
 
-        private async void SetWachedEpisodes()
+        private void SetWachedEpisodes()
         {
-            var anime = await JikanHelper.GetAnime(animeName);
-            if (anime is null)
-                Debug.Ex("anime is null");
-
-            var titleName = anime.Titles.FirstOrDefault(t => t.Type == "English")?.Title
-                     ?? anime.Titles.FirstOrDefault()?.Title
-                     ?? "Unnamed";
-
-            if(AnimeManager.ContainsAnime(titleName))
+            if(AnimeManager.ContainsAnime(animeName))
             {
                 WachedAnimeData? animeData = null;
-                if (AnimeManager.TryGetWachedAnimeData(titleName, out animeData))
+                if (AnimeManager.TryGetWachedAnimeData(animeName, out animeData))
                 {
                     if (animeData != null && animeData.WatchedEpisodesSet != null)
                     {
@@ -53,17 +45,14 @@ namespace WatchedAnimeList.Controls
                         int count = watchedEpisodes.Count;
                         string lastEp = watchedEpisodes.Any() ? watchedEpisodes.Last().ToString() : "N/A";
                         EpisodesCountText.Text = $"Переглянуто серій: {count} \n Остання серія {lastEp}";
+                        Debug.Log("Оновлюю кількість переглянутих епізодів");
                     }
                     else
                     {
                         Debug.Log("Переглянутих епізодів не знайдено", NotificationType.Info);
                         EpisodesCountText.Text = $"Переглянуто серій: 0";
                     }
-                    Debug.Log("Оновлюю кількість переглянутих епізодів");
                 }
-            }
-            else
-            {
             }
         }
         private async Task HandleTorrentDrop(string torrentFilePath, bool copyTorrent)
@@ -425,8 +414,6 @@ namespace WatchedAnimeList.Controls
 
         }
     }
-
-
 
     public class FileNameConverter : IValueConverter
     {

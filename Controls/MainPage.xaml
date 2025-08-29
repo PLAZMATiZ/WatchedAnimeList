@@ -82,8 +82,8 @@
                 <Button Name="Notifications_Button" Grid.Column="5" Click="Notifications_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" HorizontalAlignment="Center" VerticalAlignment="Center" Width="50" Height="50" BorderThickness="0" Padding="0" Cursor="Hand">
                     <Grid Width="50" Height="50">
                         <Image Source="pack://application:,,,/Assets/notifications.png" Margin="10"/>
-                        <DockPanel VerticalAlignment="Bottom" Height="20" >
-                            <TextBlock x:Name="Notifications_Counter" Text="" FlowDirection="RightToLeft" Margin="3,0,3,0" FontWeight="Bold" FontSize="16" Foreground="#FF930000"/>
+                        <DockPanel VerticalAlignment="Bottom" Height="24" >
+                            <TextBlock x:Name="Notifications_Counter" Text="" FlowDirection="RightToLeft" Margin="3,0,4,2" FontWeight="Bold" FontSize="18" Foreground="Red"/>
                         </DockPanel>
                     </Grid>
                 </Button>
@@ -131,8 +131,10 @@
             </Grid>
         
         </Grid>
+
         <Grid x:Name="RightPopupMenus" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
             <ContentControl x:Name="RightPopupContent" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
         </Grid>
+
     </Grid>
 </UserControl>

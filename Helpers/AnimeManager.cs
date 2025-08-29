@@ -223,7 +223,17 @@ namespace WatchedAnimeList.Helpers
         public static void AddEpisode(string titleName, int episode)
         {
             if (!watchedAnimeDict.TryGetValue(titleName, out var animeData))
-                Debug.Ex($"Аніме не існує: {titleName}");
+            {
+                animeData = CreateAnime_Name(titleName);
+                AddAnime(animeData);
+
+                var notification = NotificationsHelper.CreateNotification(
+                    "Переглянуто нове аніме",
+                    OnClickAction.OpenAnimeInfo,
+                    titleName);
+
+                NotificationsHelper.AddNotification(notification);
+            }
 
             if (animeData.WatchedEpisodesSet == null)
                 animeData.WatchedEpisodesSet = new SortedSet<int>();
@@ -240,9 +250,6 @@ namespace WatchedAnimeList.Helpers
         {
             var wachedAnimeData = new WachedAnimeData();
             wachedAnimeData.WatchedDate = DateTime.Now.ToString();
-
-            NotificationsHelper.AddNotification( () => { Debug.Show("lox"); }, "new Message");
-
             return wachedAnimeData;
         }
         public static WachedAnimeData CreateAnime_Name(string name)
