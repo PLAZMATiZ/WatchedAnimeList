@@ -60,6 +60,10 @@ namespace WatchedAnimeList.Helpers
 
             _ = LoadAsync();
             SubToNotificationsChange(SaveAsync);
+            NotificationsHelper.SubToIsCheckedChanged((s, n) =>
+            {
+                _ = SaveAsync();
+            });
         }
 
         /// <summary>
@@ -154,6 +158,7 @@ namespace WatchedAnimeList.Helpers
         /// Saves all notifications to JSON file
         /// </summary>
         public static void SaveAsync(object? sender, NotifyCollectionChangedEventArgs e) => _ = SaveAsync();
+        public static void SaveAsync(Notification n) => _ = SaveAsync();
         public static async Task SaveAsync()
         {
             if (folderPath == null) throw new InvalidOperationException("folderPath is null");
@@ -223,6 +228,7 @@ namespace WatchedAnimeList.Helpers
         /// <summary>
         /// Whether notification is checked (read). Triggers PropertyChanged.
         /// </summary>
+        [JsonInclude]
         public bool IsChecked
         {
             get => _isChecked;
