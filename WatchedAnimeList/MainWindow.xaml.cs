@@ -21,6 +21,19 @@ namespace WatchedAnimeList
             Initializer.Inithialize();
 
             MainPage();
+
+
+            // затичка
+            AnimePostersLoader.IfLoadPoster = (isLoading) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (isLoading)
+                        UpdateCircuit.Visibility = Visibility.Visible;
+                    else
+                        UpdateCircuit.Visibility = Visibility.Collapsed;
+                });
+            };
         }
 
         public void MainPage(bool disposePrevious = true)
@@ -41,26 +54,34 @@ namespace WatchedAnimeList
             }
             MainContent.Content = page;
         }
+
         #region UI Elements
+
+        Point LastMousePosition;
+        private void ResiseBorder_MouseDown(object sender, MouseEventArgs e)
+        {
+            var mousePos = Mouse.GetPosition(this);
+
+
+            LastMousePosition = mousePos;
+        }
+
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
                 this.DragMove();
         }
 
-        // Закрити
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Hide();
         }
 
-        // Мінімізувати
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             WindowState = WindowState.Minimized;
         }
 
-        // Тогл розгорнутого/віконного режиму
         private void WindowedButton_Click(object sender, RoutedEventArgs e)
         {
             if (WindowState == WindowState.Normal)

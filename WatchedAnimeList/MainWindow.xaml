@@ -5,12 +5,11 @@
         xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:local="clr-namespace:WatchedAnimeList.Controls"
         
-        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="CenterScreen"
+        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="Manual"
         WindowStyle="None"
         AllowsTransparency="True">
 
     <Grid Name="RootGrid">
-
         <Grid Name="MainGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>
@@ -75,7 +74,12 @@
                 <ContentControl x:Name="MainContent"/>
             </Grid>
             <Grid Name="BottomPanel" Grid.Row="3" VerticalAlignment="Stretch" Background="#262626" HorizontalAlignment="Stretch" Margin="0,0,0,0">
-
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="5*"/>
+                    <ColumnDefinition Width="0.1*"/>
+                    <ColumnDefinition Width="0.3*"/>
+                </Grid.ColumnDefinitions>
+                <Border x:Name="UpdateCircuit" CornerRadius="24" Grid.Column="1" Background="Blue" Margin="4,2" Visibility="Collapsed"/>
             </Grid>
         </Grid>
     </Grid>

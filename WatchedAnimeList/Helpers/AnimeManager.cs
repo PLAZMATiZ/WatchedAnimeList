@@ -81,31 +81,36 @@ namespace WatchedAnimeList.Helpers
 
             string localPath = Path.Combine(folderPath, "anime_data.json");
 
-            if (File.Exists(localPath))
+            try
             {
-                string json = await File.ReadAllTextAsync(localPath);
-                data = TryDeserialize(json);
+                if (File.Exists(localPath))
+                {
+                    string json = await File.ReadAllTextAsync(localPath);
+                    data = TryDeserialize(json);
+                }
+                if (data is null)
+                    Debug.Ex("data is null");
+                if (data.dataCollection is null)
+                    Debug.Ex("data.dataCollection is null");
+
+
+                watchedAnimeDict.Clear();
+                ProcessAnimeCollectionParallel(data.dataCollection);
+
+                var failed = await AnimePostersLoader.LoadImagesAsync(
+                    watchedAnimeDict,
+                    Path.Combine(folderPath, "Anime Icons")
+                );
+
+                if (failed.Count > 0)
+                    Debug.Log($"FailedLoadIcon = {failed.Count}");
+
             }
-            if (data is null)
-                Debug.Ex("data is null");
-            if (data.dataCollection is null)
-                Debug.Ex("data.dataCollection is null");
-
-
-            watchedAnimeDict.Clear();
-            ProcessAnimeCollectionParallel(data.dataCollection);
-
-            var failed = await AnimePostersLoader.LoadImagesAsync(
-                watchedAnimeDict,
-                Path.Combine(folderPath, "Anime Icons")
-            );
-
-            if (failed.Count > 0)
-                Debug.Log($"FailedLoadIcon = {failed.Count}");
-
+            catch { }
             // Google Drive
             try
             {
+                Debug.Log("Loading from Google Drive...", NotificationType.Info);
                 var drive = new GoogleDriveHelper();
                 await drive.InitAsync();
 
@@ -117,6 +122,13 @@ namespace WatchedAnimeList.Helpers
                 {
                     data = TryDeserialize(jsonText) ?? new WachedAnimeSaveDataCollection();
                     ProcessAnimeCollectionParallel(data.dataCollection, skipExisting: true);
+                    var failed = await AnimePostersLoader.LoadImagesAsync(
+                        watchedAnimeDict,
+                        Path.Combine(folderPath, "Anime Icons")
+                    );
+
+                    if (failed.Count > 0)
+                        Debug.Log($"FailedLoadIcon = {failed.Count}");
                 }
             }
             catch (Exception ex)

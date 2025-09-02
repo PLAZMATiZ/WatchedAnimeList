@@ -16,10 +16,10 @@ namespace WatchedAnimeList.Logic
         public static void Initialize()
         {
             window = MainWindow.Global;
-            LoadSettings();
+            Load();
         }
 
-        public static void SaveSettings()
+        public static void Save()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
@@ -30,10 +30,6 @@ namespace WatchedAnimeList.Logic
 
             if (window.WindowState != WindowState.Maximized)
             {
-                var left = (int)window.Left;
-                var top = (int)window.Top;
-                config.Write("Position", $"{left}/{top}", "MainWindow");
-
                 var width = (int)window.Width;
                 var height = (int)window.Height;
                 config.Write("Size", $"{width}/{height}", "MainWindow");
@@ -45,7 +41,7 @@ namespace WatchedAnimeList.Logic
             }
         }
 
-        public static void LoadSettings()
+        public static void Load()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string filePath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList", "Settings.ini");
@@ -54,32 +50,54 @@ namespace WatchedAnimeList.Logic
 
             var config = new IniFile(filePath);
 
-            string position = config.Read("Position", "MainWindow");
-            if (!string.IsNullOrWhiteSpace(position))
-            {
-                var pos = position.Split('/');
-                if (pos.Length == 2 && int.TryParse(pos[0], out int left) && int.TryParse(pos[1], out int top))
-                {
-                    window.Left = left;
-                    window.Top = top;
-                }
-            }
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
 
             string size = config.Read("Size", "MainWindow");
+            var s = size.Split('/');
+            int width = 0;
+            int height = 0;
             if (!string.IsNullOrWhiteSpace(size))
             {
-                var s = size.Split('/');
-                if (s.Length == 2 && int.TryParse(s[0], out int width) && int.TryParse(s[1], out int height))
+                if (s.Length == 2 && int.TryParse(s[0], out int _width) && int.TryParse(s[1], out int _height))
                 {
-                    window.Width = width;
-                    window.Height = height;
+                    width = _width;
+                    height = _height;
                 }
             }
+            else
+            {
+                width = 1280;
+                height = 720;
+            }
+            window.Width = Math.Min(width, screenWidth);
+            window.Height = Math.Min(height, screenHeight);
+
+            if (width <= screenWidth)
+                {
+                    var deltaWidth = screenWidth - width;
+                        window.Left = deltaWidth/2;
+            }
+
+            if (height <= screenHeight)
+                {
+                    var deltaHeight = screenHeight - height;
+                    window.Top = deltaHeight / 2;
+                }
+            
+            if (width == screenWidth)
+                window.Left = 0;
+            if(height == screenHeight)
+                window.Top = 0;
 
             string windowStateStr = config.Read("WindowState", "MainWindow");
             if (Enum.TryParse(windowStateStr, out WindowState state))
             {
                 window.WindowState = state;
+            }
+            else
+            {
+                window.WindowState = WindowState.Maximized;
             }
         }
     }

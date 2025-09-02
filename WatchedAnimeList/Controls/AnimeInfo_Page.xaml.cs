@@ -126,17 +126,6 @@ namespace WatchedAnimeList.Controls
             else
                 AnimePoster_Image.Source = animeData.AnimeImage;
         }
-        #region UIelements
-
-        private void BackToMain_Button_Click(object sender, EventArgs e)
-        {
-            MainWindow.Global.MainPage();
-        }
-        private void AddToBookmarks_Button_Click(object sender, EventArgs e)
-        {
-            Debug.Show("WIP");
-        }
-        #endregion
 
         #region KeyboardShortcuts
         private void AnimeInfo_Page_KeyDown(object sender, KeyEventArgs e)
@@ -177,6 +166,14 @@ namespace WatchedAnimeList.Controls
         #endregion
 
         #region Events
+        private void BackToMain_Button_Click(object sender, EventArgs e)
+        {
+            MainWindow.Global.MainPage();
+        }
+        private void AddToBookmarks_Button_Click(object sender, EventArgs e)
+        {
+            Debug.Show("WIP");
+        }
         private void EditOriginalName_Button_Click(object sender, EventArgs e)
         {
             IsEditingOriginalAnimeName = !IsEditingOriginalAnimeName;
