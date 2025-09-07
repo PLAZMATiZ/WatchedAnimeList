@@ -74,7 +74,13 @@ namespace WatchedAnimeList.Controls
             else
                 Debug.Log("Шлях для видалення пустий", NotificationType.Error);
         }
+        
+        public void Settings_Button_Click(object sender, EventArgs e)
+        {
+            var page = new SettingsConfig_Page();
 
+            PagesHelper.GoToPage(page);
+        }
         public void UpdateApp_Button_Click(object sender, EventArgs e)
         {
             const string fileToDownload = "WAL_Updater.exe";

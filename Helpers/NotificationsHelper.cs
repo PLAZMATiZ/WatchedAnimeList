@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using WatchedAnimeList.Controls;
+using WatchedAnimeList.Logic;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -19,8 +20,6 @@ namespace WatchedAnimeList.Helpers
     /// </summary>
     public static class NotificationsHelper
     {
-        private static string? folderPath;
-
         /// <summary>
         /// Internal collection of notifications.
         /// </summary>
@@ -42,11 +41,8 @@ namespace WatchedAnimeList.Helpers
         /// <summary>
         /// Initializes the notifications system, sets up collection change handling
         /// </summary>
-        /// <param name="_folderPath">Folder path where notifications will be saved/loaded</param>
-        public static void Initialize(string _folderPath)
+        public static void Initialize()
         {
-            folderPath = _folderPath;
-
             _notifications.CollectionChanged += (s, e) =>
             {
                 if (e.NewItems != null)
@@ -150,7 +146,7 @@ namespace WatchedAnimeList.Helpers
                     Debug.Ex("animeData is null");
 
                 var page = new AnimeInfo_Page(animeData);
-                MainWindow.Global.GoToPage(page);
+                PagesHelper.GoToPage(page);
             }
         }
 
@@ -161,11 +157,9 @@ namespace WatchedAnimeList.Helpers
         public static void SaveAsync(Notification n) => _ = SaveAsync();
         public static async Task SaveAsync()
         {
-            if (folderPath == null) throw new InvalidOperationException("folderPath is null");
-
             if (_notifications.Count == 0) return;
 
-            string jsonPath = Path.Combine(folderPath, "notifications.json");
+            string jsonPath = Path.Combine(AppPaths.AppDocumentsFolderPath, "notifications.json");
 
             var json = JsonSerializer.Serialize(_notifications.ToList(), jsonSerializerOptions);
             await File.WriteAllTextAsync(jsonPath, json);
@@ -176,9 +170,7 @@ namespace WatchedAnimeList.Helpers
         /// </summary>
         public static async Task LoadAsync()
         {
-            if (folderPath == null) throw new InvalidOperationException("folderPath is null");
-
-            string jsonPath = Path.Combine(folderPath, "notifications.json");
+            string jsonPath = Path.Combine(AppPaths.AppDocumentsFolderPath, "notifications.json");
             if (!File.Exists(jsonPath)) return;
 
             string json = await File.ReadAllTextAsync(jsonPath);

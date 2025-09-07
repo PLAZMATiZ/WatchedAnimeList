@@ -1,16 +1,17 @@
-﻿using System.Configuration;
+﻿using Microsoft.Win32;
+using System.Collections.Generic;
+using System.Configuration;
 using System.Data;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
-using System.Windows;
-using Microsoft.Win32;
-using WatchedAnimeList.Helpers;
-using System.Diagnostics;
-using Debug = WatchedAnimeList.Helpers.Debug;
 using System.Text.Json;
-using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Forms;
-using System.Drawing;
+using WatchedAnimeList.Helpers;
+using WatchedAnimeList.Logic;
+using Debug = WatchedAnimeList.Helpers.Debug;
 
 namespace WatchedAnimeList
 {
@@ -63,7 +64,6 @@ namespace WatchedAnimeList
             base.OnStartup(e);
 
             GlobalToolTip.Init();
-
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -96,6 +96,12 @@ namespace WatchedAnimeList
                 }
                 _ = UpdateUpdater();
 #endif
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _ = AnimeManager.Save();
+            Settings.SaveAll();
         }
 
         private NotifyIcon? _notifyIcon;
@@ -143,6 +149,7 @@ namespace WatchedAnimeList
         private void OnExitClick(object sender, RoutedEventArgs e)
         {
             _ = AnimeManager.Save();
+            Settings.SaveAll();
             Current.Shutdown();
         }
 

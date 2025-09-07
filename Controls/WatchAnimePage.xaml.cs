@@ -405,7 +405,7 @@ namespace WatchedAnimeList.Controls
 
         private void MainPage_Button_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.Global.MainPage();
+            PagesHelper.GoToMainPage();
         }
         #endregion
 

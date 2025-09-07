@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WatchedAnimeList.Logic;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -21,9 +22,6 @@ namespace WatchedAnimeList.Helpers
 
         public async Task InitAsync()
         {
-            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
-
             UserCredential credential;
 
             using (var stream = GetEmbeddedCredentialsStream())
@@ -33,7 +31,7 @@ namespace WatchedAnimeList.Helpers
                     new[] { DriveService.Scope.DriveFile },
                     "user",
                     CancellationToken.None,
-                    new FileDataStore(Path.Combine(folderPath, "DriveToken"), true));
+                    new FileDataStore(Path.Combine(AppPaths.AppDocumentsFolderPath, "DriveToken"), true));
             }
 
             service = new DriveService(new BaseClientService.Initializer()
@@ -92,7 +90,7 @@ namespace WatchedAnimeList.Helpers
             if (service is null)
                 Debug.Ex("service is null");
 
-            string folderId = await CreateOrGetFolderIdAsync("Wat  chedAnimeList");
+            string folderId = await CreateOrGetFolderIdAsync("WatchedAnimeList");
 
             // перевіряємо, чи такий файл вже є
             var listRequest = service.Files.List();

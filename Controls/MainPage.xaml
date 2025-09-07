@@ -129,7 +129,6 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </Grid>
-        
         </Grid>
 
         <Grid x:Name="RightPopupMenus" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
