@@ -24,7 +24,7 @@ namespace WatchedAnimeList.Helpers
         private static string AppFolderPath = AppPaths.AppDocumentsFolderPath;
         private static string AppCompabilityFolderPath = AppPaths.AppCompabilityDocumentsFolderPath;
 
-        public static void Initialize()
+        public static async void Initialize()
         {
             Debug.Log("Ініціалізація AnimeManager", NotificationType.Info);
 
@@ -32,7 +32,7 @@ namespace WatchedAnimeList.Helpers
             {
                 Directory.CreateDirectory(Path.Combine(AppFolderPath, "Anime Icons"));
             }
-            _ = LoadAsync();
+            await LoadAsync();
             Debug.Log("AnimeManager успішно ініціалізовано", NotificationType.Info);
         }
         #region Save/Load
@@ -71,45 +71,51 @@ namespace WatchedAnimeList.Helpers
         }
         public static async Task LoadAsync()
         {
+            Debug.Log("Start local LoadAsync", NotificationType.Info);
             WachedAnimeSaveDataCollection? data = null;
 
-            string localPath = Path.Combine(AppFolderPath, "anime_data.json");
-
-            if (File.Exists(localPath))
+            try
             {
-                string json = await File.ReadAllTextAsync(localPath);
-                data = TryDeserialize(json);
+                string localPath = Path.Combine(AppFolderPath, "anime_data.json");
+
+                if (File.Exists(localPath))
+                {
+                    string json = await File.ReadAllTextAsync(localPath);
+                    data = TryDeserialize(json);
+                }
+                else if (File.Exists(Path.Combine(AppCompabilityFolderPath, "anime_data.json")))
+                {
+                    localPath = Path.Combine(AppCompabilityFolderPath, "anime_data.json");
+
+                    string json = await File.ReadAllTextAsync(localPath);
+                    data = TryDeserialize(json);
+                }
+
+                if (data is null)
+                    Debug.Ex("data is null");
+                if (data.dataCollection is null)
+                    Debug.Ex("data.dataCollection is null");
+
+
+                watchedAnimeDict.Clear();
+                ProcessAnimeCollectionParallel(data.dataCollection);
+
+                var failed = await AnimePostersLoader.LoadImagesAsync(
+                    watchedAnimeDict,
+                    Path.Combine(AppFolderPath, "Anime Icons")
+                );
+
+                if (failed.Count > 0)
+                    Debug.Log($"FailedLoadIcon = {failed.Count}");
             }
-            else if(File.Exists(Path.Combine(AppCompabilityFolderPath, "anime_data.json")))
+            catch 
             {
-                localPath = Path.Combine(AppCompabilityFolderPath, "anime_data.json");
-
-                string json = await File.ReadAllTextAsync(localPath);
-                data = TryDeserialize(json);
+                Debug.Log("Local load failed", NotificationType.Warning);
             }
-            else
-                return;
-
-            if (data is null)
-                Debug.Ex("data is null");
-            if (data.dataCollection is null)
-                Debug.Ex("data.dataCollection is null");
-
-
-            watchedAnimeDict.Clear();
-            ProcessAnimeCollectionParallel(data.dataCollection);
-
-            var failed = await AnimePostersLoader.LoadImagesAsync(
-                watchedAnimeDict,
-                Path.Combine(AppFolderPath, "Anime Icons")
-            );
-
-            if (failed.Count > 0)
-                Debug.Log($"FailedLoadIcon = {failed.Count}");
-
             // Google Drive
             try
             {
+                Debug.Log("Start Google Drive LoadAsync", NotificationType.Info);
                 var drive = new GoogleDriveHelper();
                 await drive.InitAsync();
 

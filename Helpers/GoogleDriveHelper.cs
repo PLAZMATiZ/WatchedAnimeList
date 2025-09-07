@@ -17,7 +17,7 @@ namespace WatchedAnimeList.Helpers
     public class GoogleDriveHelper
     {
         private DriveService? service;
-        private const string AppName = "WachedAnimeList";
+        private const string AppName = "WatchedAnimeList";
         private const string FolderName = "MyJsonFolder"; // назва папки на Google Drive
 
         public async Task InitAsync()
@@ -126,7 +126,7 @@ namespace WatchedAnimeList.Helpers
                 if (service is null)
                     Debug.Ex("service is null");
 
-                string folderId = await CreateOrGetFolderIdAsync("WachedAnimeList");
+                string folderId = await CreateOrGetFolderIdAsync("WatchedAnimeList");
 
                 var listRequest = service.Files.List();
                 listRequest.Q = $"name='{fileNameOnDrive}' and '{folderId}' in parents and trashed=false";
@@ -135,7 +135,7 @@ namespace WatchedAnimeList.Helpers
 
                 var file = files.Files.FirstOrDefault();
                 if (file == null)
-                    throw new Exception("Файл не знайдено в папці WachedAnimeList");
+                    throw new Exception("Файл не знайдено в папці WatchedAnimeList");
 
                 var request = service.Files.Get(file.Id);
                 using (var stream = new MemoryStream())
