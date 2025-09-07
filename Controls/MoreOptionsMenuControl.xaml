@@ -18,7 +18,7 @@
         </Grid.ColumnDefinitions>
         <Button Grid.ColumnSpan="99" Click="Exit_Clik" Style="{StaticResource NoFocusButton}" Background="#33000000" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" BorderThickness="0"/>
 
-        <Grid x:Name="AnimeDownloads" Grid.Column="1" Margin="10,0,10,0" Visibility="Visible">
+        <Grid x:Name="AnimeDownloads" Grid.Column="1" Margin="10,0,10,0" Visibility="Collapsed">
             <Border Background="#141414" BorderThickness="2" BorderBrush="Black" CornerRadius="20" 
                 Margin="0,20,0,6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.RowSpan="20"/>
 
@@ -124,20 +124,21 @@
             </Grid>
             <Grid Grid.Row="2">
                 <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
+                    <Button Click="Settings_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
+                        <TextBlock Text="Settings" Background="Transparent" FontFamily="Segoe Print" 
+                   Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                </Border>
+            </Grid>
+            <Grid Grid.Row="3">
+                <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
                     <Button Click="UpdateApp_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
                         <TextBlock Text="Update App" Background="Transparent" FontFamily="Segoe Print" 
                                Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
                 </Border>
             </Grid>
-            <Grid Grid.Row="3">
-                <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
-                    <Button Click="Settings_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
-                        <TextBlock Text="Settings" Background="Transparent" FontFamily="Segoe Print" 
-                               Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Button>
-                </Border>
-            </Grid>
+            
         </Grid>
     </Grid>
 </UserControl>

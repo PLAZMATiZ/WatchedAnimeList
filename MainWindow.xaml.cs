@@ -103,7 +103,8 @@ namespace WatchedAnimeList
                 if (torrentFile is null)
                     Debug.Ex("torrentFile is null");
 
-                WatchAnimePage page = new(torrentFile);
+                WatchAnimePage page = new();
+                _ = page.HandleTorrentDrop(torrentFile);
                 MainContent.Content = page;
             }
         }

@@ -117,22 +117,10 @@ namespace WatchedAnimeList.Controls
             if (folderPath is null)
                 Debug.Ex("folderPath is null");
 
-            if (!string.IsNullOrEmpty(folderPath))
-            {
-                string folderName = Path.GetFileName(folderPath);
-                string torrentPath = Path.Combine(folderPath, folderName + ".torrent");
+            WatchAnimePage page = new();
+            page.ResumeDownload(folderPath);
 
-                if (File.Exists(torrentPath))
-                {
-                    WatchAnimePage page = new(torrentPath, false);
-
-                    MainWindow.Global.MainContent.Content = page;
-                }
-                else
-                {
-                    Debug.ShowAndLog("Торрент файл не знайдено.");
-                }
-            }
+            MainWindow.Global.MainContent.Content = page;
         }
     }
 }
