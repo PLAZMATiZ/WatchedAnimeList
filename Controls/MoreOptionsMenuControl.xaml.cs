@@ -74,7 +74,13 @@ namespace WatchedAnimeList.Controls
             else
                 Debug.Log("Шлях для видалення пустий", NotificationType.Error);
         }
+        
+        public void Settings_Button_Click(object sender, EventArgs e)
+        {
+            var page = new SettingsConfig_Page();
 
+            PagesHelper.GoToPage(page);
+        }
         public void UpdateApp_Button_Click(object sender, EventArgs e)
         {
             const string fileToDownload = "WAL_Updater.exe";
@@ -111,22 +117,10 @@ namespace WatchedAnimeList.Controls
             if (folderPath is null)
                 Debug.Ex("folderPath is null");
 
-            if (!string.IsNullOrEmpty(folderPath))
-            {
-                string folderName = Path.GetFileName(folderPath);
-                string torrentPath = Path.Combine(folderPath, folderName + ".torrent");
+            WatchAnimePage page = new();
+            page.ResumeDownload(folderPath);
 
-                if (File.Exists(torrentPath))
-                {
-                    WatchAnimePage page = new(torrentPath, false);
-
-                    MainWindow.Global.MainContent.Content = page;
-                }
-                else
-                {
-                    Debug.ShowAndLog("Торрент файл не знайдено.");
-                }
-            }
+            MainWindow.Global.MainContent.Content = page;
         }
     }
 }

@@ -19,7 +19,7 @@ using System.Collections.Specialized;
 
 namespace WatchedAnimeList.Controls
 {
-    public partial class MainPage : System.Windows.Controls.UserControl
+    public partial class MainPage : System.Windows.Controls.UserControl, IPage
     {
         public static MainPage Global = null!;
 
@@ -27,6 +27,8 @@ namespace WatchedAnimeList.Controls
         {
             Interval = TimeSpan.FromMilliseconds(600)
         };
+
+        public string PageName => "MainPage";
 
         public MainPage()
         {
@@ -261,7 +263,7 @@ namespace WatchedAnimeList.Controls
             var animeData = AnimeManager.CreateAnime_Clear();
 
             var page = new AnimeInfo_Page(animeData);
-            MainWindow.Global.GoToPage(page);
+            PagesHelper.GoToPage(page);
         }
         private void Notifications_Button_Click(object sender, RoutedEventArgs e)
         {

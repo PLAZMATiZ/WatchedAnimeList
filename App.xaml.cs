@@ -69,7 +69,6 @@ namespace WatchedAnimeList
             base.OnStartup(e);
 
             GlobalToolTip.Init();
-
         }
 
         private void Application_Startup(object sender, StartupEventArgs e)
@@ -102,6 +101,12 @@ namespace WatchedAnimeList
                 }
                 _ = UpdateUpdater();
 #endif
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            _ = AnimeManager.Save();
+            Settings.SaveAll();
         }
 
         private NotifyIcon? _notifyIcon;
@@ -149,6 +154,7 @@ namespace WatchedAnimeList
         private void OnExitClick(object sender, RoutedEventArgs e)
         {
             _ = AnimeManager.Save();
+            Settings.SaveAll();
             Current.Shutdown();
         }
 

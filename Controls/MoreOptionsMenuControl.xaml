@@ -9,7 +9,7 @@
     <UserControl.Resources>
         <local:FileNameConverter x:Key="FileNameConverter" />
     </UserControl.Resources>
-    <Grid x:Name="MoreOptionsMenuPanel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Width="1920" Height="1080">
+    <Grid x:Name="MoreOptionsMenuPanel" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="*"/>
@@ -123,12 +123,21 @@
             </Grid>
             <Grid Grid.Row="2">
                 <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
+                    <Button Click="Settings_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
+                        <TextBlock Text="Settings" Background="Transparent" FontFamily="Segoe Print" 
+                   Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Button>
+                </Border>
+            </Grid>
+            <Grid Grid.Row="3">
+                <Border BorderBrush="#34363a" BorderThickness="3" Background="#1e1e1e" CornerRadius="24" HorizontalAlignment="Stretch" Margin="6">
                     <Button Click="UpdateApp_Button_Click" Style="{StaticResource StyledButton}" Background="Transparent" VerticalContentAlignment="Stretch" HorizontalContentAlignment="Stretch" BorderThickness="0">
                         <TextBlock Text="Update App" Background="Transparent" FontFamily="Segoe Print" 
                                Foreground="#e5e5e5" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Button>
                 </Border>
             </Grid>
+            
         </Grid>
     </Grid>
 </UserControl>

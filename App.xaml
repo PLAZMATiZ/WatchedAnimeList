@@ -20,6 +20,51 @@
             </Setter>
         </Style>
 
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Grid Background="Transparent">
+                            <Border Background="#19FFFFFF" CornerRadius="6"/>
+                            <Track Name="PART_Track" IsDirectionReversed="true">
+                                <Track.DecreaseRepeatButton>
+                                    <RepeatButton Style="{x:Null}" IsTabStop="False" Height="0"/>
+                                </Track.DecreaseRepeatButton>
+                                <Track.Thumb>
+                                    <Thumb>
+                                        <Thumb.Template>
+                                            <ControlTemplate TargetType="Thumb">
+                                                <Border Background="Gray" CornerRadius="4"/>
+                                            </ControlTemplate>
+                                        </Thumb.Template>
+                                    </Thumb>
+                                </Track.Thumb>
+                                <Track.IncreaseRepeatButton>
+                                    <RepeatButton Style="{x:Null}" IsTabStop="False" Height="0"/>
+                                </Track.IncreaseRepeatButton>
+                            </Track>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="Orientation" Value="Vertical">
+                                <Setter TargetName="PART_Track" Property="Orientation" Value="Vertical"/>
+                                <Setter Property="Width" Value="8"/>
+                                <Setter Property="Height" Value="Auto"/>
+                            </Trigger>
+
+                            <Trigger Property="Orientation" Value="Horizontal">
+                                <Setter TargetName="PART_Track" Property="Orientation" Value="Horizontal"/>
+                                <Setter Property="Height" Value="8"/>
+                                <Setter Property="Width" Value="Auto"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+
         <Style x:Key="CustomToggleButton" TargetType="ToggleButton">
             <Setter Property="Width" Value="100"/>
             <Setter Property="Height" Value="40"/>
@@ -60,7 +105,7 @@
             </Setter>
         </Style>
 
-        
+
         <Style TargetType="Thumb">
             <Setter Property="Focusable" Value="False"/>
             <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
@@ -98,7 +143,7 @@
                                           FocusVisualStyle="{x:Null}"
                                           IsTabStop="False"
                                           Focusable="False">
-                                        <Rectangle Fill="#CCFFFFFF" Height="10"/>
+                                        <Rectangle Fill="#19FFFFFF" Height="10"/>
                                     </RepeatButton>
                                 </Track.DecreaseRepeatButton>
 
@@ -108,7 +153,7 @@
                                           FocusVisualStyle="{x:Null}"
                                           IsTabStop="False"
                                           Focusable="False">
-                                        <Rectangle Fill="#44666666" Height="10"/>
+                                        <Rectangle Fill="#19FFFFFF" Height="10"/>
                                     </RepeatButton>
                                 </Track.IncreaseRepeatButton>
 
@@ -184,5 +229,5 @@
             </Setter>
         </Style>
     </Application.Resources>
-    
+
 </Application>

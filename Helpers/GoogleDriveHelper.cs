@@ -10,20 +10,18 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using WatchedAnimeList.Logic;
 
 namespace WatchedAnimeList.Helpers
 {
     public class GoogleDriveHelper
     {
         private DriveService? service;
-        private const string AppName = "WachedAnimeList";
+        private const string AppName = "WatchedAnimeList";
         private const string FolderName = "MyJsonFolder"; // назва папки на Google Drive
 
         public async Task InitAsync()
         {
-            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
-
             UserCredential credential;
 
             using (var stream = GetEmbeddedCredentialsStream())
@@ -33,7 +31,7 @@ namespace WatchedAnimeList.Helpers
                     new[] { DriveService.Scope.DriveFile },
                     "user",
                     CancellationToken.None,
-                    new FileDataStore(Path.Combine(folderPath, "DriveToken"), true));
+                    new FileDataStore(Path.Combine(AppPaths.AppDocumentsFolderPath, "DriveToken"), true));
             }
 
             service = new DriveService(new BaseClientService.Initializer()
@@ -92,7 +90,7 @@ namespace WatchedAnimeList.Helpers
             if (service is null)
                 Debug.Ex("service is null");
 
-            string folderId = await CreateOrGetFolderIdAsync("Wat  chedAnimeList");
+            string folderId = await CreateOrGetFolderIdAsync("WatchedAnimeList");
 
             // перевіряємо, чи такий файл вже є
             var listRequest = service.Files.List();
@@ -128,7 +126,7 @@ namespace WatchedAnimeList.Helpers
                 if (service is null)
                     Debug.Ex("service is null");
 
-                string folderId = await CreateOrGetFolderIdAsync("WachedAnimeList");
+                string folderId = await CreateOrGetFolderIdAsync("WatchedAnimeList");
 
                 var listRequest = service.Files.List();
                 listRequest.Q = $"name='{fileNameOnDrive}' and '{folderId}' in parents and trashed=false";
@@ -137,7 +135,7 @@ namespace WatchedAnimeList.Helpers
 
                 var file = files.Files.FirstOrDefault();
                 if (file == null)
-                    throw new Exception("Файл не знайдено в папці WachedAnimeList");
+                    throw new Exception("Файл не знайдено в папці WatchedAnimeList");
 
                 var request = service.Files.Get(file.Id);
                 using (var stream = new MemoryStream())

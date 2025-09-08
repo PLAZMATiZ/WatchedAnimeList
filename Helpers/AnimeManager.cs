@@ -9,6 +9,7 @@ using System.Text.Json;
 using JikanDotNet;
 using System.Xml.Linq;
 using WatchedAnimeList.Controls;
+using WatchedAnimeList.Logic;
 
 namespace WatchedAnimeList.Helpers
 {
@@ -20,31 +21,27 @@ namespace WatchedAnimeList.Helpers
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
         private static readonly ConcurrentDictionary<string, WachedAnimeData> watchedAnimeDict = new();
-        private static string? folderPath;
+        private static string AppFolderPath = AppPaths.AppDocumentsFolderPath;
+        private static string AppCompabilityFolderPath = AppPaths.AppCompabilityDocumentsFolderPath;
 
-        public static void Initialize(string _folderPath)
+        public static async void Initialize()
         {
             Debug.Log("Ініціалізація AnimeManager", NotificationType.Info);
 
-            folderPath = _folderPath;
-
-            if(!Directory.Exists(folderPath))
+            if(!Directory.Exists(Path.Combine(AppFolderPath, "Anime Icons")))
             {
-                Directory.CreateDirectory(folderPath);
-                Directory.CreateDirectory(Path.Combine(folderPath, "Anime Icons"));
+                Directory.CreateDirectory(Path.Combine(AppFolderPath, "Anime Icons"));
             }
-            _ = LoadAsync();
+            await LoadAsync();
             Debug.Log("AnimeManager успішно ініціалізовано", NotificationType.Info);
         }
         #region Save/Load
+
         public static async Task Save()
         {
-            if(folderPath is null) 
-                Debug.Ex("folderPath is null");
-
             if (watchedAnimeDict.IsEmpty) return;
 
-            string? jsonPath = Path.Combine(folderPath, "anime_data.json");
+            string? jsonPath = Path.Combine(AppFolderPath, "anime_data.json");
 
             var data = new WachedAnimeSaveDataCollection
             {
@@ -61,7 +58,7 @@ namespace WatchedAnimeList.Helpers
                 if(item.OriginalName is null)
                     Debug.Ex("item.OriginalName is null");
 
-                string finalPath = Path.Combine(folderPath, "Anime Icons", GetSafeImageFileName(item.OriginalName));
+                string finalPath = Path.Combine(AppFolderPath, "Anime Icons", GetSafeImageFileName(item.OriginalName));
                 if (item.AnimeImage != null && !File.Exists(finalPath))
                 {
                     SaveBitmapImageToFile(item.AnimeImage, finalPath);
@@ -74,20 +71,26 @@ namespace WatchedAnimeList.Helpers
         }
         public static async Task LoadAsync()
         {
+            Debug.Log("Start local LoadAsync", NotificationType.Info);
             WachedAnimeSaveDataCollection? data = null;
-
-            if (folderPath is null)
-                Debug.Ex("folderPath is null");
-
-            string localPath = Path.Combine(folderPath, "anime_data.json");
 
             try
             {
+                string localPath = Path.Combine(AppFolderPath, "anime_data.json");
+
                 if (File.Exists(localPath))
                 {
                     string json = await File.ReadAllTextAsync(localPath);
                     data = TryDeserialize(json);
                 }
+                else if (File.Exists(Path.Combine(AppCompabilityFolderPath, "anime_data.json")))
+                {
+                    localPath = Path.Combine(AppCompabilityFolderPath, "anime_data.json");
+
+                    string json = await File.ReadAllTextAsync(localPath);
+                    data = TryDeserialize(json);
+                }
+
                 if (data is null)
                     Debug.Ex("data is null");
                 if (data.dataCollection is null)
@@ -99,18 +102,20 @@ namespace WatchedAnimeList.Helpers
 
                 var failed = await AnimePostersLoader.LoadImagesAsync(
                     watchedAnimeDict,
-                    Path.Combine(folderPath, "Anime Icons")
+                    Path.Combine(AppFolderPath, "Anime Icons")
                 );
 
                 if (failed.Count > 0)
                     Debug.Log($"FailedLoadIcon = {failed.Count}");
-
             }
-            catch { }
+            catch 
+            {
+                Debug.Log("Local load failed", NotificationType.Warning);
+            }
             // Google Drive
             try
             {
-                Debug.Log("Loading from Google Drive...", NotificationType.Info);
+                Debug.Log("Start Google Drive LoadAsync", NotificationType.Info);
                 var drive = new GoogleDriveHelper();
                 await drive.InitAsync();
 
@@ -314,7 +319,7 @@ namespace WatchedAnimeList.Helpers
                 Debug.Ex($"animeData is null | {OriginalName} |");
 
             var page = new AnimeInfo_Page(animeData);
-            MainWindow.Global.GoToPage(page);
+            PagesHelper.GoToPage(page);
         }
         #endregion
 

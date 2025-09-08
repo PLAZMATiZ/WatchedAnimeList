@@ -12,17 +12,24 @@ namespace WatchedAnimeList.Logic
     {
         public static IniFile iniFile = null!;
         private static Window window = null!;
+        private readonly static string folderPath = AppPaths.AppDocumentsFolderPath;
 
         public static void Initialize()
         {
             window = MainWindow.Global;
-            Load();
+            LoadAll();
         }
 
-        public static void Save()
+        public static void SaveProperty(string key, string section, string value)
         {
-            string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            string folderPath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList");
+            string filePath = Path.Combine(folderPath, "Settings.ini");
+            var config = new IniFile(filePath);
+
+            config.Write(key, value, section);
+        }
+
+        public static void SaveAll()
+        {
             Directory.CreateDirectory(folderPath);
 
             string filePath = Path.Combine(folderPath, "Settings.ini");
@@ -41,7 +48,20 @@ namespace WatchedAnimeList.Logic
             }
         }
 
-        public static void Load()
+        public static string? GetProperty(string key, string section)
+        {
+            string filePath = Path.Combine(folderPath, "Settings.ini");
+            var config = new IniFile(filePath);
+
+            if (File.Exists(filePath))
+            {
+                string property = config.Read(key, section);
+                return property;
+            }
+            return null;
+        }
+
+        public static void LoadAll()
         {
             string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             string filePath = Path.Combine(documentsPath, "RE ZERO", "WachedAnimeList", "Settings.ini");

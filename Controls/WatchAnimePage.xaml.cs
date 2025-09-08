@@ -16,19 +16,18 @@ using System.Windows.Data;
 using System.Text.Json;
 using System.Windows.Controls.Primitives;
 using System.Text.RegularExpressions;
+using MonoTorrent;
 
 
 namespace WatchedAnimeList.Controls
 {
     public partial class WatchAnimePage : System.Windows.Controls.UserControl
     {
-        public WatchAnimePage(string torrentFilePath, bool copyTorrent = true)
+        public WatchAnimePage()
         {
             InitializeComponent();
-
-            _ = HandleTorrentDrop(torrentFilePath, copyTorrent);
         }
-        private string? animeFolderPath;
+        private string animeFolderPath = "";
         private string animeName = "";
 
         private void SetWachedEpisodes()
@@ -55,7 +54,20 @@ namespace WatchedAnimeList.Controls
                 }
             }
         }
-        private async Task HandleTorrentDrop(string torrentFilePath, bool copyTorrent)
+
+        public async void ResumeDownload(string downloadsPath)
+        {
+            if (TorrentDownloader.IsDownloading(downloadsPath))
+            {
+                await ContinueDownload(downloadsPath);
+            }
+            else
+            {
+                await StartDownload(downloadsPath);
+            }
+        }
+
+        public async Task HandleTorrentDrop(string torrentFilePath)
         {
             animeName = Path.GetFileNameWithoutExtension(torrentFilePath);
             TitleNameFormater(animeName, out string name, out string episodes);
@@ -67,91 +79,92 @@ namespace WatchedAnimeList.Controls
             string downloadsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads", animeName);
             animeFolderPath = downloadsPath;
             Directory.CreateDirectory(downloadsPath);
-
-            string? torrentPath = "";
-            if(copyTorrent)
-            {
-                torrentPath = CopyTorrent(torrentFilePath, downloadsPath);
-
-                if(torrentPath is null)
-                    Debug.Ex("torrentPath is null");
-            }
-            else
-            {
-                torrentPath = torrentFilePath;
-            }
+            
             if (TorrentDownloader.IsDownloading(downloadsPath))
             {
-                await TorrentDownloader.DownloadFeedback(downloadsPath, this, logAction: (msg) =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        LogTextBox.Text = msg;
-                    });
-                },
-                onFinished: () =>
-                {
-                    var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                                 .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                                 .OrderBy(f => f)
-                                 .ToList();
-
-                    AnimeEpisodesList.ItemsSource = episodes;
-                },
-                onUpdate: () =>
-                {
-                    var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                                 .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                                 .OrderBy(f => f)
-                                 .ToList();
-
-                    AnimeEpisodesList.ItemsSource = episodes;
-                }
-            );
+                await ContinueDownload(downloadsPath);
             }
             else
             {
-                await TorrentDownloader.StartDownloadAsync(torrentPath, downloadsPath, this, logAction: (msg) =>
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        LogTextBox.Text = msg;
-                    });
-                },
-                onFinished: () =>
-                {
-                    var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                                 .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                                 .OrderBy(f => f)
-                                 .ToList();
-
-                    AnimeEpisodesList.ItemsSource = episodes;
-                },
-                onUpdate: () =>
-                {
-                    var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                                 .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                                 .OrderBy(f => f)
-                                 .ToList();
-
-                    AnimeEpisodesList.ItemsSource = episodes;
-                }
-            );
+                var torrent = Torrent.Load(torrentFilePath);
+                var magnetLink = new MagnetLink(torrent.InfoHashes, torrent.Name);
+                await StartDownload(downloadsPath, magnetLink);
             }
 
         }
 
-        private string? CopyTorrent(string torrentFile, string downloadsPath)
+        private async Task ContinueDownload(string downloadsPath)
         {
-            var path = Path.Combine(downloadsPath, $"{animeName}.torrent");
-            try
+            await TorrentDownloader.DownloadFeedback(downloadsPath, this, logAction: (msg) =>
             {
-                File.Copy(torrentFile, path, overwrite: true);
-                return path;
-            }
-            catch { }
-            return null;
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LogTextBox.Text = msg;
+                });
+            },
+            onFinished: () =>
+            {
+                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                    Debug.Ex("animeFolderPath is empty or does not exist");
+
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                             .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                             .OrderBy(f => f)
+                             .ToList();
+
+                AnimeEpisodesList.ItemsSource = episodes;
+            },
+            onUpdate: () =>
+            {
+                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                    Debug.Ex("animeFolderPath is empty or does not exist");
+
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                                        .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                                        .OrderBy(f => f)
+                                        .ToList();
+
+
+                AnimeEpisodesList.ItemsSource = episodes;
+            });
         }
+        
+        private async Task StartDownload(string downloadsPath, MagnetLink? magnetLink = null)
+        {
+            await TorrentDownloader.StartDownloadAsync(magnetLink, downloadsPath, this, logAction: (msg) =>
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    LogTextBox.Text = msg;
+                });
+            },
+            onFinished: () =>
+            {
+                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                    Debug.Ex("animeFolderPath is empty or does not exist");
+
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                             .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                             .OrderBy(f => f)
+                             .ToList();
+
+                AnimeEpisodesList.ItemsSource = episodes;
+            },
+            onUpdate: () =>
+            {
+                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                    Debug.Ex("animeFolderPath is empty or does not exist");
+
+                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                                        .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                                        .OrderBy(f => f)
+                                        .ToList();
+
+
+                AnimeEpisodesList.ItemsSource = episodes;
+            });
+        }
+
         private static TaskCompletionSource<bool>? tcs;
         private readonly List<ToggleButton> downloadEpisodesToggles = new();
         public List<int> GetEpisodesToDownload()
@@ -405,7 +418,7 @@ namespace WatchedAnimeList.Controls
 
         private void MainPage_Button_Click(object sender, RoutedEventArgs e)
         {
-            MainWindow.Global.MainPage();
+            PagesHelper.GoToMainPage();
         }
         #endregion
 

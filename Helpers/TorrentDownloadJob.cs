@@ -26,18 +26,15 @@ namespace WatchedAnimeList.Helpers
             this.engine = engine;
         }
 
-        public async Task AddDownloadAsync(string torrentFilePath, string _saveFolder)
+        public async Task AddDownloadAsync(MagnetLink magnetLink, string _saveFolder)
         {
             saveFolder = _saveFolder;
-            if (!File.Exists(torrentFilePath))
-                throw new FileNotFoundException("Торрент не знайдено", torrentFilePath);
-
             Directory.CreateDirectory(saveFolder);
 
-            manager = await engine.AddAsync(torrentFilePath, saveFolder, new TorrentSettingsBuilder
+            manager = await engine.AddAsync(magnetLink, saveFolder, new TorrentSettingsBuilder
             {
                 UploadSlots = 16,
-                MaximumConnections = 1000, // макс піpів на цей торрент
+                MaximumConnections = 1000,
                 AllowDht = true,
                 AllowPeerExchange = true,
                 MaximumDownloadRate = 0,

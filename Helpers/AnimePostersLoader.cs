@@ -20,7 +20,8 @@ namespace WatchedAnimeList.Helpers
 {
     public static class AnimePostersLoader
     {
-        public static Action<bool> IfLoadPoster = null!;
+        public static Action<bool> IfLoadPoster = (a) => { };
+
         public static async Task<List<string>> LoadImagesAsync(
             ConcurrentDictionary<string, WachedAnimeData> collection,
             string folderPath,

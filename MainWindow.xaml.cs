@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Controls;
-
-using WatchedAnimeList.Helpers;
+using System.Windows.Input;
 using WatchedAnimeList.Controls;
+using WatchedAnimeList.Helpers;
+using WatchedAnimeList.Logic;
 
 namespace WatchedAnimeList
 {
@@ -20,7 +20,7 @@ namespace WatchedAnimeList
             InitializeComponent();
             Initializer.Inithialize();
 
-            MainPage();
+            PagesHelper.GoToMainPage();
 
 
             // затичка
@@ -36,35 +36,38 @@ namespace WatchedAnimeList
             };
         }
 
-        public void MainPage(bool disposePrevious = true)
-        {
-            if (disposePrevious && MainContent.Content is IDisposable disposable)
+            // затичка
+            AnimePostersLoader.IfLoadPoster = (isLoading) =>
             {
-                disposable.Dispose();
-                MainContent.Content = null;
-            }
-            MainContent.Content = mainPage;
-        }
-        public void GoToPage(UserControl page, bool disposePrevious = true)
-        {
-            if (disposePrevious && MainContent.Content is IDisposable disposable)
-            {
-                disposable.Dispose();
-                MainContent.Content = null;
-            }
-            MainContent.Content = page;
-        }
+                Dispatcher.Invoke(() =>
+                {
+                    if (isLoading)
+                        UpdateCircuit.Visibility = Visibility.Visible;
+                    else
+                        UpdateCircuit.Visibility = Visibility.Collapsed;
+                });
+            };
 
+            this.MouseDown += Window_MouseDown;
+            this.KeyDown += Window_KeyDown;
+        }
         #region UI Elements
-
-        Point LastMousePosition;
-        private void ResiseBorder_MouseDown(object sender, MouseEventArgs e)
+        #region ShortCuts
+        private void Window_KeyDown(object sender, KeyEventArgs e)
         {
-            var mousePos = Mouse.GetPosition(this);
-
-
-            LastMousePosition = mousePos;
+            if (e.Key == Key.Home)
+            {
+                PagesHelper.GoToMainPage();
+            }
         }
+        private void Window_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.XButton1)
+                PagesHelper.GoBack();
+            else if (e.ChangedButton == MouseButton.XButton2)
+                PagesHelper.GoForward();
+        }
+        #endregion
 
         private void TitleBar_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -75,6 +78,7 @@ namespace WatchedAnimeList
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             Hide();
+            Settings.SaveAll();
         }
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
@@ -113,7 +117,8 @@ namespace WatchedAnimeList
                 if (torrentFile is null)
                     Debug.Ex("torrentFile is null");
 
-                WatchAnimePage page = new(torrentFile);
+                WatchAnimePage page = new();
+                _ = page.HandleTorrentDrop(torrentFile);
                 MainContent.Content = page;
             }
         }

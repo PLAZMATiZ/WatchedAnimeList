@@ -12,8 +12,10 @@ namespace WatchedAnimeList.Controls
     /// <summary>
     /// Interaction logic for AnimeInfo_Page.xaml
     /// </summary>
-    public partial class AnimeInfo_Page : UserControl, IDisposable
+    public partial class AnimeInfo_Page : UserControl, IDisposable, IPage
     {
+        public string PageName => "AnimeInfo_Page";
+
         private readonly WachedAnimeData animeData = null!;
         private bool _disposed = false;
         private bool _isEditingOriginalAnimeName = false;
@@ -26,6 +28,7 @@ namespace WatchedAnimeList.Controls
                 UpdateOriginalAnimeNameVisibility(value);
             }
         }
+
         private bool IsSaved = false;
         public AnimeInfo_Page(WachedAnimeData _animeData)
         {
@@ -126,6 +129,17 @@ namespace WatchedAnimeList.Controls
             else
                 AnimePoster_Image.Source = animeData.AnimeImage;
         }
+        #region UIelements
+
+        private void BackToMain_Button_Click(object sender, EventArgs e)
+        {
+            PagesHelper.GoToMainPage();
+        }
+        private void AddToBookmarks_Button_Click(object sender, EventArgs e)
+        {
+            Debug.Show("WIP");
+        }
+        #endregion
 
         #region KeyboardShortcuts
         private void AnimeInfo_Page_KeyDown(object sender, KeyEventArgs e)
@@ -165,7 +179,7 @@ namespace WatchedAnimeList.Controls
 
         #endregion
 
-        #region Events
+        #region Buttons
         private void BackToMain_Button_Click(object sender, EventArgs e)
         {
             MainWindow.Global.MainPage();
