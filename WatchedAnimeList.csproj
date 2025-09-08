@@ -38,10 +38,6 @@
     <None Remove="credentials.json" />
   </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="credentials.json" />
-  </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="DeepL.net" Version="1.15.0" />
@@ -59,6 +55,7 @@
     <Resource Include="Assets\aa.png" />
     <Resource Include="Assets\defaultAnimeIcon.jpg" />
     <EmbeddedResource Include="Assets\Icon.ico" />
+    <EmbeddedResource Include="credentials.json" />
     <Resource Include="Assets\def_poster.jpg" />
     <Resource Include="Assets\Icon.png" />
     <Content Include="Assets\Search.png" />

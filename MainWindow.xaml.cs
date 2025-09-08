@@ -22,6 +22,20 @@ namespace WatchedAnimeList
 
             PagesHelper.GoToMainPage();
 
+
+            // затичка
+            AnimePostersLoader.IfLoadPoster = (isLoading) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    if (isLoading)
+                        UpdateCircuit.Visibility = Visibility.Visible;
+                    else
+                        UpdateCircuit.Visibility = Visibility.Collapsed;
+                });
+            };
+        }
+
             // затичка
             AnimePostersLoader.IfLoadPoster = (isLoading) =>
             {

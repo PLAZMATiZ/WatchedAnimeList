@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\_user\\VS projects\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\_user\\vs projects\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": ".gitignore",
+              "DocumentMoniker": "C:\\_user\\VS projects\\.gitignore",
+              "RelativeDocumentMoniker": ".gitignore",
+              "ToolTip": "C:\\_user\\VS projects\\.gitignore",
+              "RelativeToolTip": ".gitignore",
+              "ViewState": "AgIAAFsBAAAAAAAAAAAAAGwBAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
+              "WhenOpened": "2025-09-01T07:36:32.388Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

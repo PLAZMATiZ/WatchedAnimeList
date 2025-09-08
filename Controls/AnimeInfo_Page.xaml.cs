@@ -180,6 +180,14 @@ namespace WatchedAnimeList.Controls
         #endregion
 
         #region Buttons
+        private void BackToMain_Button_Click(object sender, EventArgs e)
+        {
+            MainWindow.Global.MainPage();
+        }
+        private void AddToBookmarks_Button_Click(object sender, EventArgs e)
+        {
+            Debug.Show("WIP");
+        }
         private void EditOriginalName_Button_Click(object sender, EventArgs e)
         {
             IsEditingOriginalAnimeName = !IsEditingOriginalAnimeName;

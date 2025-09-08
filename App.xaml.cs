@@ -59,6 +59,11 @@ namespace WatchedAnimeList
             app.Run();
         }
 
+        protected override void OnExit(ExitEventArgs e)
+        {
+            Settings.Save();
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);

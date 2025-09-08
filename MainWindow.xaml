@@ -4,8 +4,9 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
-        xmlns:local="clr-namespace:WatchedAnimeList.Controls"        
-        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="CenterScreen"
+        xmlns:local="clr-namespace:WatchedAnimeList.Controls"
+        
+        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="Manual"
         WindowStyle="None"
         ResizeMode="CanResize"
         AllowsTransparency="False">
@@ -19,7 +20,6 @@
     </shell:WindowChrome.WindowChrome>
 
     <Grid Name="RootGrid">
-
         <Grid Name="MainGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="30"/>

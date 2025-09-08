@@ -127,6 +127,13 @@ namespace WatchedAnimeList.Helpers
                 {
                     data = TryDeserialize(jsonText) ?? new WachedAnimeSaveDataCollection();
                     ProcessAnimeCollectionParallel(data.dataCollection, skipExisting: true);
+                    var failed = await AnimePostersLoader.LoadImagesAsync(
+                        watchedAnimeDict,
+                        Path.Combine(folderPath, "Anime Icons")
+                    );
+
+                    if (failed.Count > 0)
+                        Debug.Log($"FailedLoadIcon = {failed.Count}");
                 }
             }
             catch (Exception ex)
