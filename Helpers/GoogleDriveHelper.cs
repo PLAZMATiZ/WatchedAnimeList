@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using WatchedAnimeList.Logic;
+using System.Net.NetworkInformation;
 
 namespace WatchedAnimeList.Helpers
 {

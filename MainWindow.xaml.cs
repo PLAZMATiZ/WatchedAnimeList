@@ -34,7 +34,6 @@ namespace WatchedAnimeList
                         UpdateCircuit.Visibility = Visibility.Collapsed;
                 });
             };
-        }
 
             // затичка
             AnimePostersLoader.IfLoadPoster = (isLoading) =>

@@ -57,6 +57,10 @@ namespace WatchedAnimeList.Controls
 
         public async void ResumeDownload(string downloadsPath)
         {
+            TitleNameFormater(Path.GetFileName(downloadsPath), out string name, out string episodes);
+            animeName = Regex.Replace(name, @" - .*?\[.*?\]$", "").Trim();
+            TitleTextBox.Text = animeName;
+
             if (TorrentDownloader.IsDownloading(downloadsPath))
             {
                 await ContinueDownload(downloadsPath);
@@ -70,16 +74,25 @@ namespace WatchedAnimeList.Controls
         public async Task HandleTorrentDrop(string torrentFilePath)
         {
             animeName = Path.GetFileNameWithoutExtension(torrentFilePath);
+            if (string.IsNullOrEmpty(animeName))
+            {
+                if (MagnetLink.TryParse(torrentFilePath, out MagnetLink? magnetLink))
+                {
+                    animeName = magnetLink.Name!;
+                    Debug.Show("link");
+
+                }
+            }
             TitleNameFormater(animeName, out string name, out string episodes);
             animeName = Regex.Replace(name, @" - .*?\[.*?\]$", "").Trim();
             SetWachedEpisodes();
 
-            TitleTextBox.Text = name;
+            TitleTextBox.Text = animeName;
 
             string downloadsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Downloads", animeName);
             animeFolderPath = downloadsPath;
             Directory.CreateDirectory(downloadsPath);
-            
+
             if (TorrentDownloader.IsDownloading(downloadsPath))
             {
                 await ContinueDownload(downloadsPath);
@@ -95,7 +108,9 @@ namespace WatchedAnimeList.Controls
 
         private async Task ContinueDownload(string downloadsPath)
         {
-            await TorrentDownloader.DownloadFeedback(downloadsPath, this, logAction: (msg) =>
+            var currentFolder = downloadsPath;
+
+            await TorrentDownloader.DownloadFeedback(currentFolder, this, logAction: (msg) =>
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -104,10 +119,10 @@ namespace WatchedAnimeList.Controls
             },
             onFinished: () =>
             {
-                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                if (!Directory.Exists(currentFolder))
                     Debug.Ex("animeFolderPath is empty or does not exist");
 
-                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                var episodes = Directory.GetFiles(currentFolder, "*", SearchOption.AllDirectories)
                              .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
                              .OrderBy(f => f)
                              .ToList();
@@ -116,10 +131,10 @@ namespace WatchedAnimeList.Controls
             },
             onUpdate: () =>
             {
-                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
+                if (!Directory.Exists(currentFolder))
                     Debug.Ex("animeFolderPath is empty or does not exist");
 
-                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
+                var episodes = Directory.GetFiles(currentFolder, "*", SearchOption.AllDirectories)
                                         .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
                                         .OrderBy(f => f)
                                         .ToList();
@@ -128,42 +143,44 @@ namespace WatchedAnimeList.Controls
                 AnimeEpisodesList.ItemsSource = episodes;
             });
         }
-        
+
         private async Task StartDownload(string downloadsPath, MagnetLink? magnetLink = null)
         {
-            await TorrentDownloader.StartDownloadAsync(magnetLink, downloadsPath, this, logAction: (msg) =>
-            {
-                Application.Current.Dispatcher.Invoke(() =>
+            var currentFolder = downloadsPath;
+            await TorrentDownloader.StartDownloadAsync(magnetLink, currentFolder, this,
+                logAction: (msg) =>
                 {
-                    LogTextBox.Text = msg;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        LogTextBox.Text = msg;
+                    });
+                },
+                onFinished: () =>
+                {
+                    if (!Directory.Exists(currentFolder))
+                        Debug.Ex("downloadsPath does not exist");
+
+                    var episodes = Directory.GetFiles(currentFolder, "*", SearchOption.AllDirectories)
+                                 .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                                 .OrderBy(f => f)
+                                 .ToList();
+
+                    AnimeEpisodesList.ItemsSource = episodes;
+                },
+                onUpdate: () =>
+                {
+                    if (!Directory.Exists(currentFolder))
+                        Debug.Ex("downloadsPath does not exist");
+
+                    var episodes = Directory.GetFiles(currentFolder, "*", SearchOption.AllDirectories)
+                                            .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
+                                            .OrderBy(f => f)
+                                            .ToList();
+
+                    AnimeEpisodesList.ItemsSource = episodes;
                 });
-            },
-            onFinished: () =>
-            {
-                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
-                    Debug.Ex("animeFolderPath is empty or does not exist");
-
-                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                             .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                             .OrderBy(f => f)
-                             .ToList();
-
-                AnimeEpisodesList.ItemsSource = episodes;
-            },
-            onUpdate: () =>
-            {
-                if (string.IsNullOrEmpty(animeFolderPath) || !Directory.Exists(animeFolderPath))
-                    Debug.Ex("animeFolderPath is empty or does not exist");
-
-                var episodes = Directory.GetFiles(animeFolderPath, "*", SearchOption.AllDirectories)
-                                        .Where(f => f.EndsWith(".mkv") || f.EndsWith(".mp4"))
-                                        .OrderBy(f => f)
-                                        .ToList();
-
-
-                AnimeEpisodesList.ItemsSource = episodes;
-            });
         }
+
 
         private static TaskCompletionSource<bool>? tcs;
         private readonly List<ToggleButton> downloadEpisodesToggles = new();
@@ -293,24 +310,6 @@ namespace WatchedAnimeList.Controls
             reader = new StreamReader(pipeClient);
         }
 
-        private static void TitleNameFormater(string text, out string name, out string episodes)
-        {
-            string pattern = @"\[(\d+-\d+)\]";
-            Match match = Regex.Match(text, pattern);
-
-            if (match.Success)
-            {
-                episodes = match.Groups[1].Value;
-
-                name = Regex.Replace(text, pattern, "").Trim();
-            }
-            else
-            {
-                name = text.Trim();
-                episodes = string.Empty;
-            }
-        }
-
         private int? GetEpisode(string name)
         {
             string pattern = @"\[(\d+)\]";
@@ -422,6 +421,23 @@ namespace WatchedAnimeList.Controls
         }
         #endregion
 
+        private static void TitleNameFormater(string text, out string name, out string episodes)
+        {
+            string pattern = @"\[(\d+-\d+)\]";
+            Match match = Regex.Match(text, pattern);
+
+            if (match.Success)
+            {
+                episodes = match.Groups[1].Value;
+
+                name = Regex.Replace(text, pattern, "").Trim();
+            }
+            else
+            {
+                name = text.Trim();
+                episodes = string.Empty;
+            }
+        }
         public void Dispose()
         {
 

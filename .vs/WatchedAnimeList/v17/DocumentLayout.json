@@ -1,10 +1,98 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\_user\\VS projects\\",
+  "WorkspaceRootPath": "C:\\ACL\\WatchedAnimeList\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\_user\\vs projects\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}",
-      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\networkhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\networkhelpers.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\animeinfo_page.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\animeinfo_page.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\animemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\animemanager.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\initializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\initializer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\googledrivehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\googledrivehelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\torrentdownloadjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\torrentdownloadjob.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\watchanimepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\watchanimepage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\torrentdownloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\torrentdownloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\moreoptionsmenucontrol.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\moreoptionsmenucontrol.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\watchanimepage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\watchanimepage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\logic\\settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:logic\\settings.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\animepostersloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\animepostersloader.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\animecard.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\animecard.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\moreoptionsmenucontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\moreoptionsmenucontrol.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\animecard.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\animecard.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\mainpage.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\helpers\\notificationshelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:helpers\\notificationshelper.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\mainpage.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|c:\\acl\\watchedanimelist\\controls\\notificationsmenu.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{E068F412-6215-4A92-A902-2C1C6B57AE33}|WatchedAnimeList.csproj|solutionrelative:controls\\notificationsmenu.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -14,20 +102,290 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": ".gitignore",
-              "DocumentMoniker": "C:\\_user\\VS projects\\.gitignore",
-              "RelativeDocumentMoniker": ".gitignore",
-              "ToolTip": "C:\\_user\\VS projects\\.gitignore",
-              "RelativeToolTip": ".gitignore",
-              "ViewState": "AgIAAFsBAAAAAAAAAAAAAGwBAAAgAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-09-01T07:36:32.388Z",
+              "DocumentIndex": 6,
+              "Title": "TorrentDownloadJob.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\TorrentDownloadJob.cs",
+              "RelativeDocumentMoniker": "Helpers\\TorrentDownloadJob.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\TorrentDownloadJob.cs",
+              "RelativeToolTip": "Helpers\\TorrentDownloadJob.cs",
+              "ViewState": "AgIAANwAAAAAAAAAAAAIwPkAAAA6AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-10T06:45:25.474Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "App.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\App.xaml",
+              "RelativeDocumentMoniker": "App.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\App.xaml",
+              "RelativeToolTip": "App.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-04T12:36:07.767Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "AnimeManager.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\AnimeManager.cs",
+              "RelativeDocumentMoniker": "Helpers\\AnimeManager.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\AnimeManager.cs",
+              "RelativeToolTip": "Helpers\\AnimeManager.cs",
+              "ViewState": "AgIAAFwAAAAAAAAAAAAgwHYAAAA7AAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-02T18:35:24.75Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "MainWindow.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\MainWindow.xaml",
+              "RelativeDocumentMoniker": "MainWindow.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\MainWindow.xaml",
+              "RelativeToolTip": "MainWindow.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-02T18:37:19.183Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 17,
+              "Title": "MoreOptionsMenuControl.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\MoreOptionsMenuControl.xaml",
+              "RelativeDocumentMoniker": "Controls\\MoreOptionsMenuControl.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\MoreOptionsMenuControl.xaml",
+              "RelativeToolTip": "Controls\\MoreOptionsMenuControl.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-02T17:02:24.59Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 19,
+              "Title": "MainPage.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\MainPage.xaml.cs",
+              "RelativeDocumentMoniker": "Controls\\MainPage.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\MainPage.xaml.cs",
+              "RelativeToolTip": "Controls\\MainPage.xaml.cs",
+              "ViewState": "AgIAADEAAAAAAAAAAAAAwE0AAABIAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-02T18:35:11.422Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 20,
+              "Title": "NotificationsHelper.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\NotificationsHelper.cs",
+              "RelativeDocumentMoniker": "Helpers\\NotificationsHelper.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\NotificationsHelper.cs",
+              "RelativeToolTip": "Helpers\\NotificationsHelper.cs",
+              "ViewState": "AgIAALsAAAAAAAAAAADgv6wAAABKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T13:10:26.165Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 21,
+              "Title": "MainPage.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\MainPage.xaml",
+              "RelativeDocumentMoniker": "Controls\\MainPage.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\MainPage.xaml",
+              "RelativeToolTip": "Controls\\MainPage.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-08-13T20:17:22.731Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "WatchAnimePage.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\WatchAnimePage.xaml",
+              "RelativeDocumentMoniker": "Controls\\WatchAnimePage.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\WatchAnimePage.xaml",
+              "RelativeToolTip": "Controls\\WatchAnimePage.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-08-29T08:45:19.317Z"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 180,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Initializer.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\Initializer.cs",
+              "RelativeDocumentMoniker": "Helpers\\Initializer.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\Initializer.cs",
+              "RelativeToolTip": "Helpers\\Initializer.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAAoAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T20:31:39.167Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "NetworkHelpers.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\NetworkHelpers.cs",
+              "RelativeDocumentMoniker": "Helpers\\NetworkHelpers.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\NetworkHelpers.cs",
+              "RelativeToolTip": "Helpers\\NetworkHelpers.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAxwDIAAAAzAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T20:08:47.758Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "App.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\App.xaml.cs",
+              "RelativeDocumentMoniker": "App.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\App.xaml.cs",
+              "RelativeToolTip": "App.xaml.cs",
+              "ViewState": "AgIAAB0AAAAAAAAAAAASwDoAAAAMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T20:27:40.719Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 16,
+              "Title": "AnimeCard.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeCard.xaml.cs",
+              "RelativeDocumentMoniker": "Controls\\AnimeCard.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeCard.xaml.cs",
+              "RelativeToolTip": "Controls\\AnimeCard.xaml.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAlwCEAAAAVAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T19:53:57.591Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 18,
+              "Title": "AnimeCard.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeCard.xaml",
+              "RelativeDocumentMoniker": "Controls\\AnimeCard.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeCard.xaml",
+              "RelativeToolTip": "Controls\\AnimeCard.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-03T19:49:36.546Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "AnimePostersLoader.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\AnimePostersLoader.cs",
+              "RelativeDocumentMoniker": "Helpers\\AnimePostersLoader.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\AnimePostersLoader.cs",
+              "RelativeToolTip": "Helpers\\AnimePostersLoader.cs",
+              "ViewState": "AgIAAEUAAAAAAAAAAAAUwJoAAAAlAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T19:16:42.001Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "GoogleDriveHelper.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\GoogleDriveHelper.cs",
+              "RelativeDocumentMoniker": "Helpers\\GoogleDriveHelper.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\GoogleDriveHelper.cs",
+              "RelativeToolTip": "Helpers\\GoogleDriveHelper.cs",
+              "ViewState": "AgIAAGcAAAAAAAAAAAAkwA4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T18:59:59.214Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Settings.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Logic\\Settings.cs",
+              "RelativeDocumentMoniker": "Logic\\Settings.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Logic\\Settings.cs",
+              "RelativeToolTip": "Logic\\Settings.cs",
+              "ViewState": "AgIAAAkAAAAAAAAAAAAuwAoAAAAYAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-02T19:51:20.769Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "AnimeInfo_Page.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeInfo_Page.xaml.cs",
+              "RelativeDocumentMoniker": "Controls\\AnimeInfo_Page.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\AnimeInfo_Page.xaml.cs",
+              "RelativeToolTip": "Controls\\AnimeInfo_Page.xaml.cs",
+              "ViewState": "AgIAAMYAAAAAAAAAAAA4wPwAAAAnAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T17:19:09.923Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "MoreOptionsMenuControl.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\MoreOptionsMenuControl.xaml.cs",
+              "RelativeDocumentMoniker": "Controls\\MoreOptionsMenuControl.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\MoreOptionsMenuControl.xaml.cs",
+              "RelativeToolTip": "Controls\\MoreOptionsMenuControl.xaml.cs",
+              "ViewState": "AgIAAEYAAAAAAAAAAAAQwH4AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-02T17:16:54.763Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 22,
+              "Title": "NotificationsMenu.xaml",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\NotificationsMenu.xaml",
+              "RelativeDocumentMoniker": "Controls\\NotificationsMenu.xaml",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\NotificationsMenu.xaml",
+              "RelativeToolTip": "Controls\\NotificationsMenu.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-02T19:55:03.194Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "MainWindow.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\MainWindow.xaml.cs",
+              "RelativeToolTip": "MainWindow.xaml.cs",
+              "ViewState": "AgIAADQAAAAAAAAAAAAuwE8AAAAWAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-03T20:26:49.939Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "WatchAnimePage.xaml.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Controls\\WatchAnimePage.xaml.cs",
+              "RelativeDocumentMoniker": "Controls\\WatchAnimePage.xaml.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Controls\\WatchAnimePage.xaml.cs",
+              "RelativeToolTip": "Controls\\WatchAnimePage.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFcAAAAgAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-29T08:44:29.904Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "TorrentDownloader.cs",
+              "DocumentMoniker": "C:\\ACL\\WatchedAnimeList\\Helpers\\TorrentDownloader.cs",
+              "RelativeDocumentMoniker": "Helpers\\TorrentDownloader.cs",
+              "ToolTip": "C:\\ACL\\WatchedAnimeList\\Helpers\\TorrentDownloader.cs",
+              "RelativeToolTip": "Helpers\\TorrentDownloader.cs",
+              "ViewState": "AgIAAIIAAAAAAAAAAAAQwK4AAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-10T06:45:23.788Z"
             }
           ]
         }

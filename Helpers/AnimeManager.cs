@@ -115,6 +115,8 @@ namespace WatchedAnimeList.Helpers
             // Google Drive
             try
             {
+
+                await NetworkHelper.WaitForInternetAsync();
                 Debug.Log("Start Google Drive LoadAsync", NotificationType.Info);
                 var drive = new GoogleDriveHelper();
                 await drive.InitAsync();
@@ -129,7 +131,7 @@ namespace WatchedAnimeList.Helpers
                     ProcessAnimeCollectionParallel(data.dataCollection, skipExisting: true);
                     var failed = await AnimePostersLoader.LoadImagesAsync(
                         watchedAnimeDict,
-                        Path.Combine(folderPath, "Anime Icons")
+                        Path.Combine(AppFolderPath, "Anime Icons")
                     );
 
                     if (failed.Count > 0)

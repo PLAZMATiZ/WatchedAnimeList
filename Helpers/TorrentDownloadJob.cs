@@ -41,7 +41,21 @@ namespace WatchedAnimeList.Helpers
                 MaximumUploadRate = 0,
                 RequirePeerIdToMatch = false
             }.ToSettings());
+
+            LogAction?.Invoke("Отримання данних торенту");
+
+            // Чекаємо поки підтягнуться метадані
+            if (!manager.HasMetadata)
+            {
+                await manager.StartAsync(); // треба запустити, щоб качались метадані
+                while (!manager.HasMetadata)
+                {
+                    await Task.Delay(100);
+                }
+                await manager.StopAsync(); // можна зупинити, якщо ще не качаємо файли
+            }
         }
+
 
         public List<int> GetAvailableEpisodes()
         {

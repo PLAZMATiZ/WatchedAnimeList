@@ -59,11 +59,6 @@ namespace WatchedAnimeList
             app.Run();
         }
 
-        protected override void OnExit(ExitEventArgs e)
-        {
-            Settings.Save();
-        }
-
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -107,6 +102,7 @@ namespace WatchedAnimeList
         {
             _ = AnimeManager.Save();
             Settings.SaveAll();
+            NetworkHelper.StopMonitorInternet();
         }
 
         private NotifyIcon? _notifyIcon;

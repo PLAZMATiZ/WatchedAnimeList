@@ -180,14 +180,6 @@ namespace WatchedAnimeList.Controls
         #endregion
 
         #region Buttons
-        private void BackToMain_Button_Click(object sender, EventArgs e)
-        {
-            MainWindow.Global.MainPage();
-        }
-        private void AddToBookmarks_Button_Click(object sender, EventArgs e)
-        {
-            Debug.Show("WIP");
-        }
         private void EditOriginalName_Button_Click(object sender, EventArgs e)
         {
             IsEditingOriginalAnimeName = !IsEditingOriginalAnimeName;
@@ -232,6 +224,9 @@ namespace WatchedAnimeList.Controls
         }
         private async void Sync_Button_Click(object sender, EventArgs e)
         {
+            Mouse.OverrideCursor = Cursors.Wait;
+            await NetworkHelper.WaitForInternetAsync();
+
             if (animeData is null || animeData.OriginalName is null)
                 Debug.Ex("animeData or animeData.OriginalName is null");
 
@@ -255,6 +250,7 @@ namespace WatchedAnimeList.Controls
             }
 
             _ = TextSetup();
+            Mouse.OverrideCursor = null;
         }
         private void Save_Button_Click(object sender, EventArgs e)
         {

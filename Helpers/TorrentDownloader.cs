@@ -12,6 +12,12 @@ namespace WatchedAnimeList.Helpers
 {
     public static class TorrentDownloader
     {
+        private static JsonSerializerOptions jsonSerializerOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
+
         private static ClientEngine engine = new(
             new EngineSettingsBuilder
             {
@@ -96,13 +102,25 @@ namespace WatchedAnimeList.Helpers
                 episodesToDownload = watchPage.GetEpisodesToDownload().ToList();
 
 
+                // Базовий магнет
                 string magnetUri = $"magnet:?xt=urn:btih:{magnetLink.InfoHashes.V1OrV2.ToHex()}&dn={Uri.EscapeDataString(magnetLink.Name!)}";
+
+                // Список публічних трекерів
+                string[] publicTrackers = new[]
+                {
+                    "udp://tr.libria.fun:2710/announce",
+                    "udp://retracker.local/announce"
+                };
+
+                // Додаємо кожен трекер у магнет
+                magnetUri += string.Join("", publicTrackers.Select(t => $"&tr={Uri.EscapeDataString(t)}"));
+
                 // Save selected episodes and magnet link to config
                 var json = JsonSerializer.Serialize(new DownloadConfig()
                 {
                     SelectedEpisodes = episodesToDownload,
                     MagnetLinkHashes = magnetUri
-                }, new JsonSerializerOptions { WriteIndented = true });
+                }, jsonSerializerOptions);
                 File.WriteAllText(configPath, json);
             }
 
@@ -119,10 +137,10 @@ namespace WatchedAnimeList.Helpers
                 logAction?.Invoke($"❌ Нема активного завантаження для: {saveFolder}");
                 return;
             }
-            if (job.manager is null || job.manager.Torrent is null)
+            if (job.manager is null)
                 Debug.Ex("job.manager.Torrent is null");
 
-            Debug.Log($"Відновлення підключення до завантаження: {job.manager.Torrent.Name}", NotificationType.Info);
+            Debug.Log($"Відновлення підключення до завантаження: {job.manager.Torrent!.Name!}", NotificationType.Info);
             logAction?.Invoke($"🔄 Відновлення підключення до завантаження: {job.manager.Torrent.Name}");
 
             // Показати вже активні епізоди
@@ -154,6 +172,7 @@ namespace WatchedAnimeList.Helpers
         }
         public static async Task StopAllAsync()
         {
+            Debug.Log("");
             foreach (var job in jobs.Values)
                 await job.StopDownloadAsync();
 

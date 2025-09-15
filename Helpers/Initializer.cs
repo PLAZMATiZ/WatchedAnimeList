@@ -12,6 +12,7 @@ namespace WatchedAnimeList.Helpers
             AnimeManager.Initialize();
             LocalizationHelper.Initialize();
             NotificationsHelper.Initialize();
+            NetworkHelper.Inithialize();
         }
     }
 }

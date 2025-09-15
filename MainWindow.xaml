@@ -6,7 +6,7 @@
         xmlns:vwp="clr-namespace:WpfToolkit.Controls;assembly=VirtualizingWrapPanel"
         xmlns:local="clr-namespace:WatchedAnimeList.Controls"
         
-        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="Manual"
+        Title="Wached Anime List" Width="1920" Height="1080" Background="#1e1e1e" WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         ResizeMode="CanResize"
         AllowsTransparency="False">
